@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace - AgriConnectX Cameroon</title>
+    <link rel="stylesheet" href="/frontend/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <h2>AgriConnectX</h2>
+                <span>Cameroon</span>
+            </div>
+            <nav class="nav">
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/marketplace.html" class="active">Marketplace</a></li>
+                    <li><a href="/resources.html">Resources</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#" id="dashboardBtn">Dashboard</a></li>
+                    <li><a href="#" id="logoutBtn">Logout</a></li>
+                </ul>
+            </nav>
+            <div class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Marketplace Hero -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Cameroon Agricultural Marketplace</h1>
+                <p>Browse fresh produce from local farmers across Cameroon</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filters Section -->
+    <section class="filters-section">
+        <div class="container">
+            <div class="filters-container">
+                <div class="filter-group">
+                    <label for="categoryFilter">Category</label>
+                    <select id="categoryFilter">
+                        <option value="all">All Categories</option>
+                        <option value="vegetables">Vegetables</option>
+                        <option value="fruits">Fruits</option>
+                        <option value="grains">Grains</option>
+                        <option value="livestock">Livestock</option>
+                        <option value="poultry">Poultry</option>
+                        <option value="dairy">Dairy</option>
+                        <option value="fish">Fish</option>
+                        <option value="root_crops">Root Crops</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="locationFilter">Location</label>
+                    <input type="text" id="locationFilter" placeholder="Enter location...">
+                </div>
+                <div class="filter-group">
+                    <label for="priceFilter">Max Price (FCFA)</label>
+                    <input type="number" id="maxPriceFilter" placeholder="Max price...">
+                </div>
+                <div class="filter-group">
+                    <label for="searchFilter">Search</label>
+                    <input type="text" id="searchFilter" placeholder="Search products...">
+                </div>
+                <button id="applyFilters" class="btn btn-primary">Apply Filters</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Grid -->
+    <section class="products-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Available Products</h2>
+                <div class="results-count">
+                    Showing <span id="productCount">0</span> products
+                </div>
+            </div>
+            <div class="products-container" id="productsContainer">
+                <!-- Products will be loaded here dynamically -->
+            </div>
+            <div class="pagination" id="pagination">
+                <!-- Pagination controls will be loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>AgriConnectX Cameroon</h3>
+                    <p>Connecting farmers and buyers for a better agricultural economy.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/marketplace.html">Marketplace</a></li>
+                        <li><a href="/resources.html">Resources</a></li>
+                        <li><a href="#about">About Us</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p>Email: info@agriconnectx.cm</p>
+                    <p>Phone: +237 123 456 789</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 AgriConnectX Cameroon. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Product Detail Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content large-modal">
+            <span class="close">&times;</span>
+            <div id="productDetailContent">
+                <!-- Product details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Purchase Modal -->
+    <div id="purchaseModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="purchaseContent">
+                <h3>Purchase Product</h3>
+                <form id="purchaseForm">
+                    <div class="form-group">
+                        <label for="quantity">Quantity</label>
+                        <input type="number" id="quantity" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="deliveryAddress">Delivery Address</label>
+                        <textarea id="deliveryAddress" rows="3" required></textarea>
+                    </div>
+                    <div class="total-price">
+                        Total: <span id="totalPrice">FCFA 0</span>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Proceed to Payment</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="/frontend/js/marketplace.js"></script>
+</body>
+</html>

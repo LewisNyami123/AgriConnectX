@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - AgriConnectX Cameroon</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <h2>AgriConnectX</h2>
+                <span>Cameroon</span>
+            </div>
+            <nav class="nav">
+                <ul>
+                    <li><a href="/frontend/views/index.html">Home</a></li>
+                    <li><a href="/frontend/views/marketplace.html">Marketplace</a></li>
+                    <li><a href="/frontend/views/admin-dashboard.html" class="active">Admin Dashboard</a></li>
+                    <li><a href="#" id="profileBtn">Profile</a></li>
+                    <li><a href="#" id="logoutBtn">Logout</a></li>
+                </ul>
+            </nav>
+            <div class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Dashboard Hero -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Welcome, <span id="adminName">Admin</span></h1>
+                <p>Manage the AgriConnectX platform, users, and system settings</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Overview -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-users"></i>
+                    <div class="stat-info">
+                        <h3 id="totalUsers">0</h3>
+                        <p>Total Users</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-user-friends"></i>
+                    <div class="stat-info">
+                        <h3 id="farmersCount">0</h3>
+                        <p>Registered Farmers</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-shopping-cart"></i>
+                    <div class="stat-info">
+                        <h3 id="totalOrders">0</h3>
+                        <p>Total Orders</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-dollar-sign"></i>
+                    <div class="stat-info">
+                        <h3 id="totalRevenue">FCFA 0</h3>
+                        <p>Total Revenue</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Dashboard Content -->
+    <section class="dashboard-content">
+        <div class="container">
+            <div class="dashboard-grid">
+                <!-- Left Column: Pending Farmers Approval -->
+                <div class="dashboard-column">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3>Pending Farmers Approval</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="pending-farmers-list" id="pendingFarmersList">
+                                <!-- Pending farmers will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: System Overview -->
+                <div class="dashboard-column">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3>System Overview</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="system-stats">
+                                <div class="system-stat">
+                                    <span>Active Sessions:</span>
+                                    <span id="activeSessions">0</span>
+                                </div>
+                                <div class="system-stat">
+                                    <span>Today's Transactions:</span>
+                                    <span id="todaysTransactions">0</span>
+                                </div>
+                                <div class="system-stat">
+                                    <span>Uptime:</span>
+                                    <span id="uptime">--</span>
+                                </div>
+                                <div class="system-stat">
+                                    <span>Database Status:</span>
+                                    <span id="dbStatus" class="status-green">Operational</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3>Recent Activity</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="activity-list" id="recentActivity">
+                                <!-- Recent activity will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>AgriConnectX Cameroon</h3>
+                    <p>Connecting farmers and buyers for a better agricultural economy.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/marketplace.html">Marketplace</a></li>
+                        <li><a href="/admin-dashboard.html">Admin Dashboard</a></li>
+                        <li><a href="/reports.html">Reports</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p>Email: admin@agriconnectx.cm</p>
+                    <p>Phone: +237 123 456 789</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 AgriConnectX Cameroon. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/frontend/js/admin-dashboard.js"></script>
+</body>
+</html>

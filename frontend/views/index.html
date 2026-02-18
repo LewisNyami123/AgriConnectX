@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriConnectX Cameroon - Connecting Farmers and Buyers</title>
+    <link rel="stylesheet" href="/frontend/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <h2>AgriConnectX</h2>
+                <span>Cameroon</span>
+            </div>
+            <nav class="nav">
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#marketplace">Marketplace</a></li>
+                    <li><a href="#resources">Resources</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#" id="loginBtn">Login</a></li>
+                    <li><a href="#" id="registerBtn">Register</a></li>
+                </ul>
+            </nav>
+            <div class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Connecting Farmers and Buyers in Cameroon</h1>
+                <p>AgriConnectX helps farmers sell their produce directly to buyers, eliminating middlemen and increasing profits.</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary" id="farmerRegisterBtn">Register as Farmer</button>
+                    <button class="btn btn-secondary" id="buyerRegisterBtn">Register as Buyer</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2>Why Choose AgriConnectX?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-tractor"></i>
+                    <h3>Direct Sales</h3>
+                    <p>Sell your produce directly to buyers without intermediaries.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-mobile-alt"></i>
+                    <h3>Mobile Payments</h3>
+                    <p>Secure payments through MTN MoMo and Orange Money.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-comments"></i>
+                    <h3>Easy Communication</h3>
+                    <p>Negotiate prices and terms directly with buyers.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Market Insights</h3>
+                    <p>Access real-time market prices and trends.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- gallery preview -->
+    
+        
+            <div class="slider">
+  <div class="slide-track">
+    <div class="slide"><img src="/frontend/assets/IMG-20260116-WA0061.jpg"></div>
+    <div class="slide"><img src="/frontend/assets/IMG-20260116-WA0061.jpg"></div>
+    <div class="slide"><img src="/frontend/assets/IMG-20260116-WA0063.jpg"></div>
+    <div class="slide"><img src="/frontend/assets/IMG-20260116-WA0064.jpg"></div>
+    <div class="slide"><img src="/frontend/assets/IMG-20260116-WA0065.jpg"></div>
+    <div class="slide"><img src="/frontend/assets/IMG-20260116-WA0066.jp"></div>
+
+    <!-- Duplicate set for seamless loop -->
+         <div class="slide"><img src="/frontend/assets/IMG-20260116-WA0061.jpg"></div>
+    <div class="slide"><img src="/frontend/assets/IMG-20260116-WA0061.jpg"></div>
+    <div class="slide"><img src="/frontend/assets/IMG-20260116-WA0063.jpg"></div>
+    <div class="slide"><img src="/frontend/assets/IMG-20260116-WA0064.jpg"></div>
+    <div class="slide"><img src="/frontend/assets/IMG-20260116-WA0065.jpg"></div>
+    <div class="slide"><img src="/frontend/assets/IMG-20260116-WA0066.jpg"></div>
+
+  </div>
+</div>
+           
+   
+
+    <!-- Marketplace Preview -->
+    <section id="marketplace" class="marketplace-preview">
+        <div class="container">
+            <h2>Popular Products</h2>
+            <div class="products-container" id="productsContainer">
+                <!-- Products will be loaded here dynamically -->
+            </div>
+            <div class="view-all-btn">
+                <a href="marketplace.html" class="btn btn-outline">View All Products</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Resources Preview -->
+    <section id="resources" class="resources-preview">
+        <div class="container">
+            <h2>Agricultural Resources</h2>
+            <div class="resources-container" id="resourcesContainer">
+                <!-- Resources will be loaded here dynamically -->
+            </div>
+            <div class="view-all-btn">
+                <a href="resources.html" class="btn btn-outline">View All Resources</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>AgriConnectX Cameroon</h3>
+                    <p>Connecting farmers and buyers for a better agricultural economy.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#marketplace">Marketplace</a></li>
+                        <li><a href="#resources">Resources</a></li>
+                        <li><a href="#about">About Us</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p>Email: info@agriconnectx.cm</p>
+                    <p>Phone: +237 123 456 789</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 AgriConnectX Cameroon. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Authentication Modals -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="auth-container">
+                <div class="auth-forms">
+                    <!-- Login Form -->
+                    <form id="loginForm" class="auth-form active">
+                        <h3>Login to Your Account</h3>
+                        <div class="form-group">
+                            <input type="email" id="loginEmail" placeholder="Email" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" id="loginPassword" placeholder="Password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Login</button>
+                        <p class="switch-form">Don't have an account? <a href="#" id="showRegister">Register</a></p>
+                    </form>
+
+                    <!-- Register Form -->
+                    <form id="registerForm" class="auth-form">
+                        <h3>Create an Account</h3>
+                        <div class="form-row">
+                            <div class="form-group half">
+                                <input type="text" id="firstName" placeholder="First Name" required>
+                            </div>
+                            <div class="form-group half">
+                                <input type="text" id="lastName" placeholder="Last Name" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" id="registerEmail" placeholder="Email" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="tel" id="phone" placeholder="Phone Number" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" id="registerPassword" placeholder="Password" required>
+                        </div>
+                        <div class="form-group">
+                            <select id="role" required>
+                                <option value="">Select Role</option>
+                                <option value="farmer">Farmer</option>
+                                <option value="buyer">Buyer</option>
+                            </select>
+                        </div>
+                        <div id="farmerFields" style="display: none;">
+                            <div class="form-group">
+                                <input type="text" id="farmName" placeholder="Farm Name">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" id="farmLocation" placeholder="Farm Location">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Register</button>
+                        <p class="switch-form">Already have an account? <a href="#" id="showLogin">Login</a></p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/frontend/js/main.js"></script>
+</body>
+</html> 

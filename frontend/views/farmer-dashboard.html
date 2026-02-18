@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Dashboard - AgriConnectX Cameroon</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <h2>AgriConnectX</h2>
+                <span>Cameroon</span>
+            </div>
+            <nav class="nav">
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/marketplace.html">Marketplace</a></li>
+                    <li><a href="/resources.html">Resources</a></li>
+                    <li><a href="/farmer-dashboard.html" class="active">Dashboard</a></li>
+                    <li><a href="#" id="profileBtn">Profile</a></li>
+                    <li><a href="#" id="logoutBtn">Logout</a></li>
+                </ul>
+            </nav>
+            <div class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Dashboard Hero -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Welcome, <span id="farmerName">Farmer</span></h1>
+                <p>Manage your farm, products, and sales from your dashboard</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Overview -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-box-open"></i>
+                    <div class="stat-info">
+                        <h3 id="productsCount">0</h3>
+                        <p>Active Products</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-shopping-cart"></i>
+                    <div class="stat-info">
+                        <h3 id="salesCount">0</h3>
+                        <p>Total Sales</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-wallet"></i>
+                    <div class="stat-info">
+                        <h3 id="earnings">FCFA 0</h3>
+                        <p>Total Earnings</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-star"></i>
+                    <div class="stat-info">
+                        <h3 id="rating">0.0</h3>
+                        <p>Average Rating</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Dashboard Content -->
+    <section class="dashboard-content">
+        <div class="container">
+            <div class="dashboard-grid">
+                <!-- Left Column: Products Management -->
+                <div class="dashboard-column">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3>My Products</h3>
+                            <button id="addProductBtn" class="btn btn-primary">Add Product</button>
+                        </div>
+                        <div class="card-content">
+                            <div class="products-list" id="productsList">
+                                <!-- Products will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Recent Orders and Notifications -->
+                <div class="dashboard-column">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3>Recent Orders</h3>
+                            <a href="/orders.html" class="view-all-link">View All</a>
+                        </div>
+                        <div class="card-content">
+                            <div class="orders-list" id="ordersList">
+                                <!-- Orders will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3>Notifications</h3>
+                            <span class="notification-badge" id="notificationCount">0</span>
+                        </div>
+                        <div class="card-content">
+                            <div class="notifications-list" id="notificationsList">
+                                <!-- Notifications will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>AgriConnectX Cameroon</h3>
+                    <p>Connecting farmers and buyers for a better agricultural economy.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/marketplace.html">Marketplace</a></li>
+                        <li><a href="/resources.html">Resources</a></li>
+                        <li><a href="/farmer-dashboard.html">Dashboard</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p>Email: info@agriconnectx.cm</p>
+                    <p>Phone: +237 123 456 789</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 AgriConnectX Cameroon. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Add/Edit Product Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="modal-body">
+                <h3 id="productModalTitle">Add New Product</h3>
+                <form id="productForm">
+                    <div class="form-group">
+                        <label for="productName">Product Name</label>
+                        <input type="text" id="productName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productDescription">Description</label>
+                        <textarea id="productDescription" rows="4" required></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label for="productCategory">Category</label>
+                            <select id="productCategory" required>
+                                <option value="">Select Category</option>
+                                <option value="vegetables">Vegetables</option>
+                                <option value="fruits">Fruits</option>
+                                <option value="grains">Grains</option>
+                                <option value="livestock">Livestock</option>
+                                <option value="poultry">Poultry</option>
+                                <option value="dairy">Dairy</option>
+                                <option value="fish">Fish</option>
+                                <option value="root_crops">Root Crops</option>
+                                <option value="spices">Spices</option>
+                                <option value="nuts">Nuts</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group half">
+                            <label for="productUnit">Unit</label>
+                            <select id="productUnit" required>
+                                <option value="kg">Kilograms (kg)</option>
+                                <option value="piece">Piece</option>
+                                <option value="bunch">Bunch</option>
+                                <option value="basket">Basket</option>
+                                <option value="bag">Bag</option>
+                                <option value="liter">Liter</option>
+                                <option value="ton">Ton</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label for="productPrice">Price per Unit (FCFA)</label>
+                            <input type="number" id="productPrice" min="0" required>
+                        </div>
+                        <div class="form-group half">
+                            <label for="productQuantity">Available Quantity</label>
+                            <input type="number" id="productQuantity" min="0" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="productQuality">Quality Grade</label>
+                        <select id="productQuality">
+                            <option value="premium">Premium</option>
+                            <option value="standard" selected>Standard</option>
+                            <option value="basic">Basic</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="productImages">Product Images</label>
+                        <input type="file" id="productImages" accept="image/*" multiple>
+                        <small>Upload images of your product</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Product</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="/frontend/js/farmer-dashboard.js"></script>
+</body>
+</html>

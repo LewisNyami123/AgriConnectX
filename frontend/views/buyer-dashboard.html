@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buyer Dashboard - AgriConnectX Cameroon</title>
+    <link rel="stylesheet" href="/frontend/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <h2>AgriConnectX</h2>
+                <span>Cameroon</span>
+            </div>
+            <nav class="nav">
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/marketplace.html">Marketplace</a></li>
+                    <li><a href="/resources.html">Resources</a></li>
+                    <li><a href="/buyer-dashboard.html" class="active">Dashboard</a></li>
+                    <li><a href="#" id="profileBtn">Profile</a></li>
+                    <li><a href="#" id="logoutBtn">Logout</a></li>
+                </ul>
+            </nav>
+            <div class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Dashboard Hero -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Welcome, <span id="buyerName">Buyer</span></h1>
+                <p>Manage your purchases, orders, and favorite products</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Overview -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-shopping-cart"></i>
+                    <div class="stat-info">
+                        <h3 id="ordersCount">0</h3>
+                        <p>Total Orders</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-box"></i>
+                    <div class="stat-info">
+                        <h3 id="itemsCount">0</h3>
+                        <p>Items Purchased</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-wallet"></i>
+                    <div class="stat-info">
+                        <h3 id="spent">FCFA 0</h3>
+                        <p>Total Spent</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-star"></i>
+                    <div class="stat-info">
+                        <h3 id="rating">0.0</h3>
+                        <p>Your Rating</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Dashboard Content -->
+    <section class="dashboard-content">
+        <div class="container">
+            <div class="dashboard-grid">
+                <!-- Left Column: Recent Orders -->
+                <div class="dashboard-column">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3>Recent Orders</h3>
+                            <a href="/orders.html" class="view-all-link">View All</a>
+                        </div>
+                        <div class="card-content">
+                            <div class="orders-list" id="ordersList">
+                                <!-- Orders will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Favorite Products and Notifications -->
+                <div class="dashboard-column">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3>Favorite Products</h3>
+                            <a href="/favorites.html" class="view-all-link">View All</a>
+                        </div>
+                        <div class="card-content">
+                            <div class="products-list" id="favoritesList">
+                                <!-- Favorites will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3>Notifications</h3>
+                            <span class="notification-badge" id="notificationCount">0</span>
+                        </div>
+                        <div class="card-content">
+                            <div class="notifications-list" id="notificationsList">
+                                <!-- Notifications will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>AgriConnectX Cameroon</h3>
+                    <p>Connecting farmers and buyers for a better agricultural economy.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                         <li><a href="/frontend/views/index.html">Home</a></li>
+                         <li><a href="/frontend/views/marketplace.html">Marketplace</a></li>
+                        <li><a href="/frontend/views/resources.html">Resources</a></li>
+                        <li><a href="/frontend/views/buyer-dashboard.html">Dashboard</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p>Email: info@agriconnectx.cm</p>
+                    <p>Phone: +237 123 456 789</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 AgriConnectX Cameroon. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/frontend/js/buyer-dashboard.js"></script>
+</body>
+</html>
