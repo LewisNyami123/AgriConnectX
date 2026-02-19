@@ -61,7 +61,7 @@ const userSchema = new mongoose.Schema({
 
 /* ---------- Indexes ---------- */
 // Ensure unique email index at DB level
-userSchema.index({ email: 1 }, { unique: true });
+// userSchema.index({ email: 1 }, { unique: true });
 
 /* ---------- Hooks ---------- */
 userSchema.pre('save', async function () {
