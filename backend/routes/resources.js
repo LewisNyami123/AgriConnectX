@@ -1,10 +1,11 @@
+// routes/resources.js
 const express = require('express');
 const router = express.Router();
-const { 
-  getAllResources, 
-  getResourceById, 
-  createResource, 
-  updateResource, 
+const {
+  getAllResources,
+  getResourceById,
+  createResource,
+  updateResource,
   deleteResource,
   getResourcesByCategory,
   toggleLike,
@@ -12,12 +13,13 @@ const {
   getFeaturedResources,
   getWeatherUpdates
 } = require('../controllers/resourceController');
-const { protect, admin, farmer, buyer } = require('../middleware/auth');
+
+const { protect, authorize } = require('../middleware/auth');
 
 // Public routes
 router.route('/')
   .get(getAllResources)
-  .post(protect, admin, createResource);
+  .post(protect, authorize('admin'), createResource);
 
 router.route('/featured')
   .get(getFeaturedResources);
@@ -28,11 +30,13 @@ router.route('/weather')
 router.route('/category/:category')
   .get(getResourcesByCategory);
 
+// Resource detail and admin-only modifications
 router.route('/:id')
   .get(getResourceById)
-  .put(protect, admin, updateResource)
-  .delete(protect, admin, deleteResource);
+  .put(protect, authorize('admin'), updateResource)
+  .delete(protect, authorize('admin'), deleteResource);
 
+// Interactions
 router.route('/:id/like')
   .post(protect, toggleLike);
 

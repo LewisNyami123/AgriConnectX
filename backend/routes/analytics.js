@@ -1,21 +1,24 @@
+// routes/analytics.js
 const express = require('express');
 const router = express.Router();
-const { 
-  getUserAnalytics, 
+const {
+  getUserAnalytics,
   getAdminAnalytics,
   getProductAnalytics
 } = require('../controllers/analyticsController');
-const { protect, admin, farmer, buyer } = require('../middleware/auth');
 
-// Routes for user analytics
+const { protect, authorize } = require('../middleware/auth');
+
+// Routes for user analytics (authenticated users)
 router.route('/user')
   .get(protect, getUserAnalytics);
 
+// Product analytics for farmers
 router.route('/products')
-  .get(protect, farmer, getProductAnalytics);
+  .get(protect, authorize('farmer'), getProductAnalytics);
 
-// Route for admin analytics
+// Admin analytics
 router.route('/admin')
-  .get(protect, admin, getAdminAnalytics);
+  .get(protect, authorize('admin'), getAdminAnalytics);
 
 module.exports = router;

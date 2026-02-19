@@ -1,151 +1,108 @@
+// controllers/authController.js
 const asyncHandler = require('../utils/asyncHandler');
 const User = require('../models/User');
-const generateToken = require('../utils/generateToken');
 const ErrorResponse = require('../utils/errorResponse');
-
-
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-// const User = require('../models/User');
+const crypto = require('crypto');
 
-const register = async (req, res) => {
+// Access token
+function createAccessToken(user) {
+  return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE || '1h'
+  });
+}
+
+// Refresh token
+function createRefreshToken(user) {
+  return jwt.sign({ id: user._id }, process.env.REFRESH_TOKEN_SECRET, {
+    expiresIn: process.env.REFRESH_EXPIRE || '30d'
+  });
+}
+
+function sendTokenResponse(user, statusCode, res) {
+  const accessToken = createAccessToken(user);
+  const refreshToken = createRefreshToken(user);
+
+  const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 30 * 24 * 60 * 60 * 1000
+  };
+
+  res.cookie('refreshToken', refreshToken, cookieOptions);
+
+  return res.status(statusCode).json({
+    success: true,
+    accessToken,
+    user: {
+      id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+      profilePicture: user.profilePicture || '',
+      farmName: user.farmName || '',
+      farmLocation: user.farmLocation || null,
+      isApproved: user.isApproved
+    }
+  });
+}
+
+// Register
+const register = asyncHandler(async (req, res, next) => {
   const { firstName, lastName, email, password, phone, role, farmName, farmLocation } = req.body;
 
-  try {
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ success: false, message: 'User already exists' });
-    }
+  if (!firstName || !lastName || !email || !password || !phone) {
+    return next(new ErrorResponse('Missing required fields', 400));
+  }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 12);
+  const existingUser = await User.findOne({ email });
+  if (existingUser) return next(new ErrorResponse('Email already registered', 409));
 
-    // Create user
-    const user = new User({
-      firstName,
-      lastName,
-      email,
-      password: hashedPassword,
-      phone,
-      role: role || 'buyer',
-      farmName,
-      farmLocation,
-      isApproved: role === 'farmer' ? false : true
-    });
+  const user = new User({
+    firstName,
+    lastName,
+    email,
+    password, // model pre-save will hash
+    phone,
+    role: role || 'buyer',
+    farmName,
+    farmLocation,
+    isApproved: role === 'farmer' ? false : true
+  });
 
-    await user.save();
+  await user.save();
 
-    // Generate token
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' }
-    );
-
-    // Send response
-    res.status(201).json({
+  if (user.role === 'farmer' && !user.isApproved) {
+    return res.status(201).json({
       success: true,
-      message: role === 'farmer'
-        ? 'Registration successful! Pending admin approval.'
-        : 'Registration successful!',
-      token,
+      message: 'Registration successful. Your account is pending admin approval.',
       user: {
         id: user._id,
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
-        phone: user.phone,
         role: user.role,
-        farmName: user.farmName,
-        farmLocation: user.farmLocation,
         isApproved: user.isApproved
       }
     });
-  } catch (err) {
-    console.error('Register error:', err);
-    res.status(500).json({ success: false, message: 'Server error: ' + err.message });
   }
-};
-// @desc    Register user
-// @route   POST /api/auth/register
-// @access  Public
-// const register = asyncHandler(async (req, res, next) => {
-//   const { firstName, lastName, email, password, phone, role, farmName, farmLocation } = req.body;
 
-//   // Check if user already exists BEFORE creating
-//   const existingUser = await User.findOne({ email });
-//   if (existingUser) {
-//     return next(new ErrorResponse('Email already registered', 400));
-//   }
+  sendTokenResponse(user, 201, res);
+});
 
-//   // Create user once
-//   const user = await User.create({
-//     firstName,
-//     lastName,
-//     email,
-//     password,
-//     phone,
-//     role: role || 'buyer',
-//     farmName,
-//     farmLocation,
-//     isApproved: role === 'farmer' ? false : true
-//   });
-
-//   // Send token + success response
-//   sendTokenResponse(user, 201, res);
-// });
-//const registerUser = async (req, res) => {
-  // const { firstName, lastName, email, password, phone, role, farmName, farmLocation } = req.body;
-
-  // try {
-  //   const existingUser = await User.findOne({ email });
-  //   if (existingUser) {
-  //     return res.status(400).json({ message: 'User already exists' });
-  //   }
-
-  //   // const hashedPassword = await bcrypt.hash(password, 12);
-
-  //   const user = new User({ 
-  //   firstName,
-  //   lastName,
-  //   email,
-  //   password,
-  //   phone,
-  //   role: role || 'buyer',
-  //   farmName,
-  //   farmLocation,
-  //   isApproved: role === 'farmer' ? false : true });
-  //   await user.save();
-
-  //   // Generate token immediately
-  //   const token = jwt.sign({ id: user._id, role: user.role, level: user.level }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-  //   res.status(201).json({
-  //     token,
-  //     user: { id: user._id, name: user.name, role: user.role, level: user.level }
-  //   });
-  // } catch (err) {
-  //   console.error("Register error:", err);
-  //   res.status(500).json({ message: err.message });
-  // }
-//};//
-
-// @desc    Login user
-// @route   POST /api/auth/login
-// @access  Public
+// Login
 const login = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
-
-  if (!email || !password) {
-    return next(new ErrorResponse('Please provide an email and password', 400));
-  }
+  if (!email || !password) return next(new ErrorResponse('Please provide email and password', 400));
 
   const user = await User.findOne({ email }).select('+password');
   if (!user) return next(new ErrorResponse('Invalid credentials', 401));
 
   if (user.role === 'farmer' && !user.isApproved) {
-    return next(new ErrorResponse('Account pending admin approval', 401));
+    return next(new ErrorResponse('Account pending admin approval', 403));
   }
 
   const isMatch = await user.comparePassword(password);
@@ -154,84 +111,89 @@ const login = asyncHandler(async (req, res, next) => {
   sendTokenResponse(user, 200, res);
 });
 
-// @desc    Get current logged in user
-// @route   GET /api/auth/me
-// @access  Private
+// Get current user
 const getMe = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.user.id);
   if (!user) return next(new ErrorResponse('User not found', 404));
-
   res.status(200).json({ success: true, data: user });
 });
 
-// @desc    Update user details
-// @route   PUT /api/auth/update
-// @access  Private
+// Update details
 const updateDetails = asyncHandler(async (req, res, next) => {
-  const fieldsToUpdate = { ...req.body };
+  const allowed = ['firstName', 'lastName', 'phone', 'profilePicture', 'farmName', 'farmLocation'];
+  const updates = {};
+  allowed.forEach(k => { if (req.body[k] !== undefined) updates[k] = req.body[k]; });
 
-  const user = await User.findByIdAndUpdate(req.user.id, fieldsToUpdate, {
-    new: true,
-    runValidators: true
-  });
-
+  const user = await User.findByIdAndUpdate(req.user.id, updates, { new: true, runValidators: true });
   if (!user) return next(new ErrorResponse('User not found', 404));
-
   res.status(200).json({ success: true, data: user });
 });
 
-// @desc    Update password
-// @route   PUT /api/auth/updatepassword
-// @access  Private
+// Update password
 const updatePassword = asyncHandler(async (req, res, next) => {
+  const { currentPassword, newPassword } = req.body;
+  if (!currentPassword || !newPassword) return next(new ErrorResponse('Missing fields', 400));
+
   const user = await User.findById(req.user.id).select('+password');
   if (!user) return next(new ErrorResponse('User not found', 404));
 
-  const isMatch = await user.comparePassword(req.body.currentPassword);
-  if (!isMatch) return next(new ErrorResponse('Password is incorrect', 401));
+  const isMatch = await user.comparePassword(currentPassword);
+  if (!isMatch) return next(new ErrorResponse('Current password incorrect', 401));
 
-  user.password = req.body.newPassword;
-  await user.save(); // relies on pre-save hook for hashing
+  user.password = newPassword;
+  await user.save();
 
   sendTokenResponse(user, 200, res);
 });
 
-// @desc    Forgot password
-// @route   POST /api/auth/forgotpassword
-// @access  Public
+// Forgot password scaffold
 const forgotPassword = asyncHandler(async (req, res, next) => {
-  return next(new ErrorResponse('Forgot password not implemented yet', 501));
+  const { email } = req.body;
+  if (!email) return next(new ErrorResponse('Email required', 400));
+
+  const user = await User.findOne({ email });
+  if (!user) return res.status(200).json({ success: true, message: 'If that email exists, a reset link will be sent' });
+
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  const resetHash = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+  user.resetPasswordToken = resetHash;
+  user.resetPasswordExpire = Date.now() + 60 * 60 * 1000;
+  await user.save({ validateBeforeSave: false });
+
+  // TODO: send resetToken via SMS or email
+  res.status(200).json({ success: true, message: 'Password reset initiated', resetToken });
 });
 
-// Helper: send token response
-const sendTokenResponse = (user, statusCode, res) => {
-  const token = generateToken(user._id);
+// Refresh token
+const refreshToken = asyncHandler(async (req, res, next) => {
+  const token = req.cookies?.refreshToken || req.body.refreshToken;
+  if (!token) return next(new ErrorResponse('No refresh token', 401));
 
-  const options = {
-    expires: new Date(Date.now() + Number(process.env.JWT_EXPIRE) * 24 * 60 * 60 * 1000), // days
-    httpOnly: true
-  };
-
-  if (process.env.NODE_ENV === 'production') {
-    options.secure = true;
+  try {
+    const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+    const user = await User.findById(decoded.id);
+    if (!user) return next(new ErrorResponse('Invalid token', 401));
+    const accessToken = createAccessToken(user);
+    return res.json({ success: true, accessToken });
+  } catch (err) {
+    return next(new ErrorResponse('Invalid refresh token', 401));
   }
+});
 
-  res.status(statusCode).cookie('token', token, options).json({
-    success: true,
-    token,
-    user: {
-      id: user._id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      phone: user.phone,
-      role: user.role,
-      profilePicture: user.profilePicture,
-      farmName: user.farmName,
-      farmLocation: user.farmLocation,
-      isApproved: user.isApproved
-    }
-  });
+// Logout
+const logout = asyncHandler(async (req, res, next) => {
+  res.clearCookie('refreshToken', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax' });
+  res.json({ success: true, message: 'Logged out' });
+});
+
+module.exports = {
+  register,
+  login,
+  getMe,
+  updateDetails,
+  updatePassword,
+  forgotPassword,
+  refreshToken,
+  logout
 };
-
-module.exports = { register, login, getMe, updateDetails, updatePassword, forgotPassword };

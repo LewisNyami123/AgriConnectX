@@ -1,21 +1,23 @@
+// routes/products.js
 const express = require('express');
 const router = express.Router();
-const { 
-  getAllProducts, 
-  getProductById, 
-  createProduct, 
-  updateProduct, 
+const {
+  getAllProducts,
+  getProductById,
+  createProduct,
+  updateProduct,
   deleteProduct,
   getProductsByCategory,
   getProductsByLocation,
   searchProducts
 } = require('../controllers/productController');
-const { protect, admin, farmer, buyer } = require('../middleware/auth');
+
+const { protect, authorize } = require('../middleware/auth');
 
 // Public routes
 router.route('/')
   .get(getAllProducts)
-  .post(protect, farmer, createProduct);
+  .post(protect, authorize('farmer'), createProduct);
 
 router.route('/search')
   .get(searchProducts);
@@ -26,9 +28,10 @@ router.route('/category/:category')
 router.route('/location/:location')
   .get(getProductsByLocation);
 
+// Keep parameter routes last to avoid conflicts
 router.route('/:id')
   .get(getProductById)
-  .put(protect, farmer, updateProduct)
-  .delete(protect, farmer, deleteProduct);
+  .put(protect, authorize('farmer'), updateProduct)
+  .delete(protect, authorize('farmer'), deleteProduct);
 
 module.exports = router;
