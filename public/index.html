@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Agri</title>
+  <script>window.API_BASE = window.API_BASE || '';</script>
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/animations.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-row">
+      <a class="brand" href="/">AgriMarket</a>
+      <div class="search-wrap">
+        <input id="globalSearch" class="search-input" placeholder="Search produce, sellers..." aria-label="Search products" />
+      </div>
+    </div>
+    <nav class="nav">
+      <a class="btn ghost" href="/products/list.html">Products</a>
+      <a class="btn ghost" href="/messages/inbox.html">Messages</a>
+      <a class="btn ghost" href="/dashboard/buyer.html" id="dashboardLink">Dashboard</a>
+      <button id="loginBtn" class="btn">Login</button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="hero card">
+      <div class="hero-grid">
+        <div>
+          <h1>Local produce, direct from farmers</h1>
+          <p class="small">Discover fresh produce, message sellers, and manage your farm — all in one place.</p>
+          <div style="margin-top:12px">
+            <a class="btn" href="/products/list.html">Browse Products</a>
+            <a class="btn ghost" href="/dashboard/farmer.html" style="margin-left:8px">Sell on AgriMarket</a>
+          </div>
+        </div>
+        <div class="hero-illustration">
+          <img src="/assets/images/hero-farm.svg" alt="Farm illustration" />
+        </div>
+      </div>
+    </section>
+
+    <section class="container-grid" id="homeSections">
+      <div class="card">
+        <h3>Featured produce</h3>
+        <div id="featuredGrid" class="grid cols-3"></div>
+      </div>
+      <div class="card">
+        <h3>Recent conversations</h3>
+        <div id="recentConvos"></div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="/js/auth.js"></script>
+  <script type="module">
+    import { renderFeatured } from '/js/products.js';
+    import { renderRecentConversations } from '/js/conversations.js';
+    document.addEventListener('DOMContentLoaded', () => {
+      renderFeatured('featuredGrid');
+      renderRecentConversations('recentConvos');
+    });
+  </script>
+</body>
+</html>

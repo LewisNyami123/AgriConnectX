@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Buyer Dashboard - AgriMarket</title>
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/components.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/">AgriMarket</a>
+    <nav class="nav">
+      <a class="btn ghost" href="/products/list.html">Products</a>
+      <a class="btn ghost" href="/messages/inbox.html">Messages</a>
+      <button id="logoutBtn" class="btn">Logout</button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="header-row" style="margin-bottom:12px">
+      <h2>Your Buyer Dashboard</h2>
+      <div class="small">Welcome back — manage saved items, offers, and messages.</div>
+    </div>
+
+    <section class="grid cols-3">
+      <div class="card">
+        <h3>Saved items</h3>
+        <div id="savedList">Loading…</div>
+      </div>
+      <div class="card">
+        <h3>Recent orders & offers</h3>
+        <div id="ordersList">Loading…</div>
+      </div>
+      <div class="card">
+        <h3>Messages</h3>
+        <div id="inboxPreview">Loading…</div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import '/js/auth.js';
+    import { renderSaved } from '/js/products.js';
+    import { renderInboxPreview } from '/js/conversations.js';
+    document.addEventListener('DOMContentLoaded', () => {
+      renderSaved('savedList');
+      renderInboxPreview('inboxPreview');
+    });
+  </script>
+</body>
+</html>

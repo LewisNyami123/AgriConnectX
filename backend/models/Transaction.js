@@ -57,7 +57,7 @@ transactionSchema.pre('validate', function(next) {
 });
 
 // Indexes for fast lookups
-transactionSchema.index({ transactionId: 1 });
+// transactionSchema.index({ transactionId: 1 });
 transactionSchema.index({ 'paymentDetails.transactionRef': 1 });
 
 module.exports = mongoose.model('Transaction', transactionSchema);

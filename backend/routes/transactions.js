@@ -1,35 +1,28 @@
 // routes/transactions.js
 const express = require('express');
+const { validationResult } = require('express-validator');
 const router = express.Router();
-const {
-  getAllTransactions,
-  getTransactionById,
-  createTransaction,
-  updateTransaction,
-  deleteTransaction,
-  getUserTransactions,
-  processPayment
-} = require('../controllers/transactionController');
 
-const { protect, authorize } = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
+const transactionController = require('../controllers/transactionController');
+const validators = require('../validators/transactionValidators');
 
-// Admin can list all transactions
-router.route('/')
-  .get(protect, authorize('admin'), getAllTransactions)
-  .post(protect, authorize('buyer'), createTransaction);
+// validation handler
+function handleValidation(req, res, next) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
+  next();
+}
 
-// Transactions for a specific user
-router.route('/user/:userId')
-  .get(protect, getUserTransactions);
+router.post('/', protect, validators.createTransaction, handleValidation, transactionController.createTransaction);
+router.post('/:id/pay/initiate', protect, validators.initiatePayment, handleValidation, transactionController.initiatePayment);
 
-// Process payment for a transaction (buyer)
-router.route('/process-payment/:id')
-  .post(protect, authorize('buyer'), processPayment);
+// webhook: no auth, provider verifies signature
+router.post('/webhook/payments', express.raw({ type: '*/*' }), transactionController.paymentWebhook);
 
-// Single transaction operations
-router.route('/:id')
-  .get(protect, getTransactionById)
-  .put(protect, updateTransaction) // consider owner check inside controller or middleware
-  .delete(protect, authorize('admin'), deleteTransaction);
+router.get('/', protect, validators.pagination, handleValidation, transactionController.getAllTransactions);
+router.get('/:id', protect, transactionController.getTransactionById);
+router.put('/:id', protect, transactionController.updateTransaction);
+router.delete('/:id', protect, transactionController.deleteTransaction);
 
 module.exports = router;

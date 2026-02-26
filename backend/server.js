@@ -12,13 +12,16 @@ const {validationResult} = require('express-validator');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const productRoutes = require('./routes/products');
-const transactionRoutes = require('./routes/transactions');
+const transactionRoutes = require('./routes/transactions')
 const messageRoutes = require('./routes/messages');
 const resourceRoutes = require('./routes/resources');
 const analyticsRoutes = require('./routes/analytics');
 
 const app = express();
 
+const http = require('http');
+const { Server } = require('socket.io');
+const serverApp = http.createServer(app);
 
 /* ---------- Middleware ---------- */
 app.use(helmet());
@@ -34,7 +37,7 @@ app.use((req, res, next) => {
 
 // CORS: restrict in production by setting FRONTEND_URL in .env
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || '*',
+  origin: ["http://localhost:5500", "http://127.0.0.1:5500"],
   credentials: true,
 };
 app.use(cors(corsOptions));
@@ -72,6 +75,51 @@ app.use((err, req, res, next) => {
     message: err.message || 'Server Error',
   });
 });
+
+
+// server.js
+
+
+const io = new Server(serverApp, { cors: { origin: process.env.FRONTEND_URL || '*' }});
+
+// attach io to express app so controllers can access it
+app.set('io', io);
+
+// socket auth middleware example (replace verifyToken with your JWT verify)
+io.use(async (socket, next) => {
+  try {
+    const token = socket.handshake.auth && socket.handshake.auth.token;
+    if (!token) return next(new Error('Authentication error'));
+    // verifyToken should return user object { id, role, ... }
+    const user = await verifyToken(token); // implement verifyToken using your auth logic
+    socket.user = user;
+    return next();
+  } catch (err) {
+    return next(new Error('Authentication error'));
+  }
+});
+
+io.on('connection', (socket) => {
+  const userId = socket.user && socket.user.id;
+  if (userId) {
+    // personal room for push notifications
+    socket.join(`user:${userId}`);
+  }
+
+  // client can join conversation rooms
+  socket.on('joinConversation', (conversationId) => {
+    if (conversationId) socket.join(conversationId);
+  });
+
+  socket.on('leaveConversation', (conversationId) => {
+    if (conversationId) socket.leave(conversationId);
+  });
+
+  socket.on('disconnect', () => {
+    // handle presence cleanup if needed
+  });
+});
+
 
 /* ---------- DB connection with retry/backoff ---------- */
 const PORT = process.env.PORT || 3000;

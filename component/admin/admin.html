@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin | AgriConnectX</title>
+
+<link rel="stylesheet" href="../style/dashboard.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+<div class="dashboard">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+      <div class="logo">
+          <h2>AgriConnectX</h2>
+          <span>Admin Panel</span>
+      </div>
+
+      <ul class="menu">
+          <li data-route="dashboard" class="active">
+            <i class="fas fa-chart-line"></i> Dashboard
+          </li>
+
+          <li data-route="users" id="usersMenu">
+            <i class="fas fa-users"></i> Users
+          </li>
+
+          <li data-route="products">
+            <i class="fas fa-box"></i> Products
+          </li>
+
+          <li data-route="escrow">
+            <i class="fas fa-wallet"></i> Escrow
+          </li>
+
+          <li data-route="logistics">
+            <i class="fas fa-truck"></i> Logistics
+          </li>
+
+          <li data-route="disputes">
+            <i class="fas fa-exclamation-circle"></i> Disputes
+          </li>
+      </ul>
+
+      <div class="logout">
+          <button type="button" id="logoutBtn">Logout</button>
+      </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+      <header class="topbar">
+          <h1 id="pageTitle">Dashboard</h1>
+          <div class="profile">
+              <img src="https://i.pravatar.cc/100" alt="Admin Profile">
+              <span>Admin</span>
+          </div>
+      </header>
+
+      <!-- DYNAMIC CONTENT AREA -->
+      <section id="appContent"></section>
+
+  </main>
+
+</div>
+
+<!-- Add User Modal -->
+<div id="addUserModal" class="modal">
+  <div class="modal-content">
+
+    <div class="modal-header">
+      <h3>Add New User</h3>
+      <button type="button" class="close" id="closeUserModal">&times;</button>
+    </div>
+
+    <form id="addUserForm">
+
+      <div class="form-group">
+        <label for="userName">Full Name</label>
+        <input type="text" id="userName" required>
+      </div>
+
+      <div class="form-group">
+        <label for="userEmail">Email</label>
+        <input type="email" id="userEmail" required>
+      </div>
+
+      <div class="form-group">
+        <label for="userRole">Role</label>
+        <select id="userRole" required>
+          <option value="">Select Role</option>
+          <option value="Farmer">Farmer</option>
+          <option value="Buyer">Buyer</option>
+          <option value="Transporter">Transporter</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="userStatus">Status</label>
+        <select id="userStatus" required>
+          <option value="Pending">Pending</option>
+          <option value="Approved">Approved</option>
+          <option value="Suspended">Suspended</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn-primary full-btn">
+        Save User
+      </button>
+
+    </form>
+  </div>
+</div>
+ <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script type="module" src="./js/app.js"></script>
+</body>
+</html>

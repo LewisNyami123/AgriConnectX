@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriConnectX</title>
+    <link rel="stylesheet" href="style/styles.css">
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+   <!-- header section -->
+<header class="header">
+  <div class="nav-wrapper">
+    <div class="logo">
+      <i class="fas fa-leaf"></i>
+      <span>AgriConnectX</span>
+    </div>
+
+    <nav class="nav" id="mainNav">
+                <ul>
+                    <li><a href="#home"><i class="fas fa-home"></i>Home</a></li>
+                    <li><a href="#marketplace"><i class="fas fa-shop"></i>Marketplace</a></li>
+                    <li><a href="#resources"><i class="fas fa-book"></i>Resources</a></li>
+                    <li><a href="#about"><i class="fas fa-user"></i>About Us</a></li>
+                    <li><a href="#contact"><i class="fas fa-phone"></i>Contact Us</a></li>
+                    <li><a href="auth.html" id="loginBtn"><i class="fas fa-sign-in-alt"></i>Login</a></li>
+                    <li><a href="auth.html" id="registerBtn"><i class="fas fa-sign-in-alt"></i>Sign Up</a></li>
+                </ul>
+            </nav>
+            
+
+    <a href="#" class="quote-btn">Get A Quote</a>
+
+    <div class="mobile-menu-btn" id="menuToggle">
+      <i class="fas fa-bars"></i>
+    </div>
+  </div>
+</header>
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <p class="hero-sub">AgriConnectX helps farmers sell their produce directly to buyers, eliminating middlemen and increasing profits.</p>
+                <h1>Connecting Farmers - Buyers <br>in Cameroon</h1>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary" id="farmerRegisterBtn"><i class="fas fa-user-plus"></i><a href="auth.html">Register as Farmer</a></button>
+                    <button class="btn btn-outline-white" id="buyerRegisterBtn"><i class="fas fa-user-plus"></i><a href="auth.html" >Register as Buyer</a></button>
+                </div>
+            </div>
+        </div>
+        <div class="wave"></div>
+    </section>
+   
+    <!-- About Us  -->
+     <section class="about-us" id="about">
+        <div class="container">
+            <h2>About AgriConnectX</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <p>AgriConnectX is a digital platform designed to revolutionize agriculture in Cameroon by bridging the gap between farmers and buyers.</p>
+                    <p>Our mission is to empower local farmers with tools and technology to sell their produce directly, ensuring fair prices and sustainable livelihoods.</p>
+                    <ul>
+                        <li>Support over 10,000 farmers across Cameroon</li>
+                        <li>Enable transparent pricing and fair trade</li>
+                        <li>Provide agricultural education and market information</li>
+                        <li>Build a sustainable farming community</li>
+                    </ul>
+                </div>
+                <div class="about-image">
+                    <img src="assets/IMG-20260116-WA0087.jpg" alt="Farmers using AgriConnectX">
+                    <img src="assets/IMG-20260116-WA0065 - Copy.jpg" alt="Farmers using AgriConnectX">
+                    <img src="assets/IMG-20260116-WA0077.jpg" alt="Farmers using AgriConnectX">
+                </div>
+            </div>
+        </div>
+
+        </div>
+     </section>
+     <!-- Features Section -->
+    <section class="features" >
+        <div class="container">
+            <h2>Why Choose AgriConnectX?</h2>
+            <h1>The Best Choice For Your Business</h1>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-tractor"></i>
+                    <h3>Direct Sales</h3>
+                    <p>Sell your produce directly to buyers without intermediaries.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-mobile-alt"></i>
+                    <h3>Mobile Payments</h3>
+                    <p>Secure payments through MTN MoMo and Orange Money.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-comments"></i>
+                    <h3>Easy Communication</h3>
+                    <p>Negotiate prices and terms directly with buyers.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Market Insights</h3>
+                    <p>Access real-time market prices and trends.</p>
+                </div>
+            </div>
+            
+        </div>
+         <div class="care-features">
+                <h3>care features</h3>
+                <div class="feature-card container">
+                    <h1>We want to Help create a reliable communicaton between buyer and seller</h1>
+                    <p>Our main goal create a digital platform for our customers which offers fast sales to buyers ,
+                        fast delivery to buyers , a user friendly interface 
+                    which allows buyers and sellers browser through products of desire!!! </p>
+                    <h3>Key Care Features</h3>
+                <ul>
+                <li> <i class="fas fa-arrow"></i>Fast delivery</li>
+                <li><i class="fas fa-arrow"></i>Product tracking</li>
+                <li><i class="fas fa-arrow"></i>Secured Payment</li>
+                <li><i class="fas fa-arrow"></i>Variety of Agricultural products</li>
+                </ul>
+                </div>
+                <div class="video-placeholder">
+                       <video src="assets/videoplayback.mp4" controls loop></video>
+                    </div>
+                    <button type="button" class="btn">Explore More</button>
+            </div>
+    </section>
+    
+     <!-- Marketplace Preview -->
+    <section id="marketplace" class="marketplace-preview">
+        <div class="container">
+            <h2>Popular Products</h2>
+            <div class="products-container" id="productsContainer">
+                <!-- Products will be loaded here dynamically -->
+            </div>
+            <div class="view-all-btn">
+                <a href="marketplace.html" class="btn btn-outline">View All Products</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Resources Preview -->
+    <section id="resources" class="resources-preview">
+        <div class="container">
+            <h2>Agricultural Resources</h2>
+            <div class="resources-container" id="resourcesContainer">
+                <!-- Resources will be loaded here dynamically -->
+            </div>
+            <div class="view-all-btn">
+                <a href="resources.html" class="btn btn-outline">View All Resources</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>AgriConnectX Cameroon</h3>
+                    <p>Connecting farmers and buyers for a better agricultural economy.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#marketplace">Marketplace</a></li>
+                        <li><a href="#resources">Resources</a></li>
+                        <li><a href="#about">About Us</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section" id="contact">
+                    <h4>Contact</h4>
+                    <form action="mailto:lewisnyami2@gmail.com" method="post" enctype="text/plain">
+                       Name:<br>
+                    <input type="text" name="name"><br>
+                    Email:<br>
+                    <input type="email" name="email"><br>
+                    Message:<br>
+                    <textarea name="message"></textarea><br><br>
+                    <input type="submit" value="Send">
+                    </form>
+                    <p>Email: info@agriconnectx.cm</p>
+                    <p>Phone: +237 652 70 13 00</p>
+                </div>
+                <div class="contact-icons">
+                    <a href="https://whatsapp.com/683394605" >                                         
+                <i class="fab fa-whatsapp"></i>
+                whatsApp
+                </a>
+
+                <a href="https://facebook.com/Lewis Nyami" target="_blank">
+                <i class="fab fa-facebook-f"></i>
+                Facebook
+                </a>
+
+                <a href="https://instagram.com/lewis_nyami" target="_blank">                                                      
+                <i class="fab fa-instagram"></i>
+                Instagram
+                </a>
+
+                <a href="https://linkedin.com/in/Lewis Nyami" target="_blank">
+                <i class="fab fa-linkedin-in"></i>
+                Linkedin
+                </a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 AgriConnectX Cameroon. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    <script>
+const menuToggle = document.getElementById("menuToggle");
+const mainNav = document.getElementById("mainNav");
+
+menuToggle.addEventListener("click", () => {
+    mainNav.classList.toggle("active");
+    menuToggle.classList.toggle("open");
+});
+</script>
+</body>
+</html>

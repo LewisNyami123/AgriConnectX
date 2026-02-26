@@ -92,7 +92,7 @@ userSchema.statics.createAdminIfMissing = async function (opts = {}) {
     firstName: opts.firstName || 'System',
     lastName: opts.lastName || 'Admin',
     email,
-    password: opts.password || (process.env.DEFAULT_ADMIN_PASSWORD || 'AdminStrongPassword123!'),
+    password: opts.password || (process.env.DEFAULT_ADMIN_PASSWORD || 'Admin@123'),
     phone: opts.phone || '600000000',
     role: 'admin',
     isActive: true,

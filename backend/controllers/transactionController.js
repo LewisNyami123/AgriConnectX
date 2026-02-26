@@ -1,213 +1,219 @@
+// controllers/transactionController.js
 const asyncHandler = require('../utils/asyncHandler');
 const Transaction = require('../models/Transaction');
 const Product = require('../models/Product');
 const User = require('../models/User');
 const ErrorResponse = require('../utils/errorResponse');
+const { getOrCreateByIdempotency } = require('../utils/idempotency');
+const { verifyProviderSignature } = require('../utils/paymentUtils'); // implement provider-specific verification
 
-// @desc    Get all transactions
-// @route   GET /api/transactions
-// @access  Private/Admin
-const getAllTransactions = asyncHandler(async (req, res, next) => {
-  const transactions = await Transaction.find()
-    .populate('buyer seller', 'firstName lastName email phone')
-    .populate('products.product', 'name images basePrice')
-    .sort({ createdAt: -1 });
+// Helper: sanitize transaction output
+function sanitizeTransaction(tx) {
+  if (!tx) return null;
+  const t = tx.toObject ? tx.toObject() : tx;
+  // remove any internal fields if present
+  delete t.__v;
+  return t;
+}
 
-  res.status(200).json({
-    success: true,
-    count: transactions.length,
-    data: transactions
-  });
-});
-
-// @desc    Get single transaction
-// @route   GET /api/transactions/:id
-// @access  Private
-const getTransactionById = asyncHandler(async (req, res, next) => {
-  const transaction = await Transaction.findById(req.params.id)
-    .populate('buyer seller', 'firstName lastName email phone')
-    .populate('products.product', 'name images basePrice');
-
-  if (!transaction) {
-    return next(new ErrorResponse(`Transaction not found with id of ${req.params.id}`, 404));
-  }
-
-  // Make sure user is buyer, seller, or admin
-  if (
-    transaction.buyer.toString() !== req.user.id.toString() &&
-    transaction.seller.toString() !== req.user.id.toString() &&
-    req.user.role !== 'admin'
-  ) {
-    return next(new ErrorResponse('Not authorized to view this transaction', 401));
-  }
-
-  res.status(200).json({
-    success: true,
-    data: transaction
-  });
-});
-
-// @desc    Create new transaction
-// @route   POST /api/transactions
-// @access  Private/Buyer
+// POST /api/transactions
+// Create transaction with idempotency, atomic stock reservation, server-side totals
 const createTransaction = asyncHandler(async (req, res, next) => {
-  const { products, totalAmount, paymentMethod, deliveryAddress } = req.body;
+  const idempotencyKey = req.header('Idempotency-Key') || req.body.idempotencyKey;
+  const payload = req.body;
 
-  // Verify products exist and have enough quantity
-  for (const item of products) {
-    const product = await Product.findById(item.product);
-    if (!product) {
-      return next(new ErrorResponse(`Product not found with id of ${item.product}`, 404));
+  if (!Array.isArray(payload.products) || payload.products.length === 0) {
+    return next(new ErrorResponse('Products are required', 400));
+  }
+
+  const result = await getOrCreateByIdempotency(idempotencyKey, async () => {
+    const reservedItems = [];
+    let sellerId = null;
+    let totalAmount = 0;
+    const items = [];
+
+    try {
+      for (const item of payload.products) {
+        if (!item.product || !item.quantity) throw new ErrorResponse('Invalid product item', 400);
+        const prod = await Product.findById(item.product);
+        if (!prod) throw new ErrorResponse(`Product not found: ${item.product}`, 404);
+        if (item.quantity <= 0) throw new ErrorResponse('Quantity must be > 0', 400);
+
+        if (!sellerId) sellerId = prod.seller.toString();
+        if (prod.seller.toString() !== sellerId) throw new ErrorResponse('All items must belong to the same seller', 400);
+
+        // Reserve stock atomically
+        const reserved = await Product.reserveStock(prod._id, item.quantity);
+        if (!reserved) throw new ErrorResponse(`Insufficient stock for ${prod.title || prod.name}`, 400);
+
+        reservedItems.push({ productId: prod._id, qty: item.quantity });
+
+        const unitPrice = prod.price;
+        const totalPrice = unitPrice * item.quantity;
+        totalAmount += totalPrice;
+        items.push({
+          product: prod._id,
+          quantity: item.quantity,
+          unitPrice,
+          totalPrice
+        });
+      }
+
+      const transaction = await Transaction.create({
+        idempotencyKey: idempotencyKey || undefined,
+        transactionId: `tx_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
+        buyer: req.user.id,
+        seller: sellerId,
+        products: items,
+        totalAmount,
+        paymentMethod: payload.paymentMethod,
+        paymentStatus: 'pending',
+        deliveryAddress: payload.deliveryAddress,
+        status: 'active'
+      });
+
+      return transaction;
+    } catch (err) {
+      // rollback reserved stock on error
+      for (const r of reservedItems) {
+        try { await Product.releaseStock(r.productId, r.qty); } catch (e) { /* log if needed */ }
+      }
+      throw err;
     }
-    if (product.quantityAvailable < item.quantity) {
-      return next(new ErrorResponse(`Insufficient quantity for ${product.name}`, 400));
-    }
-  }
-
-  // Create transaction ID
-  const transactionId = `TXN${Date.now()}${Math.floor(Math.random() * 1000)}`;
-
-  const transaction = await Transaction.create({
-    transactionId,
-    buyer: req.user.id,
-    seller: products[0].seller || (await Product.findById(products[0].product)).seller, // Assuming all items are from same seller for now
-    products,
-    totalAmount,
-    paymentMethod,
-    deliveryAddress,
-    status: 'active'
   });
 
-  // Update product quantities
-  for (const item of products) {
-    await Product.findByIdAndUpdate(item.product, {
-      $inc: { quantityAvailable: -item.quantity, soldCount: item.quantity }
-    });
-  }
-
-  // Update user stats
-  await User.findByIdAndUpdate(req.user.id, {
-    $inc: { totalPurchases: totalAmount }
-  });
-
-  await User.findByIdAndUpdate(transaction.seller, {
-    $inc: { totalSales: totalAmount }
-  });
-
-  res.status(201).json({
-    success: true,
-    data: transaction
-  });
+  const transaction = result.existing || result;
+  res.status(result.created === false ? 200 : 201).json({ success: true, data: sanitizeTransaction(transaction) });
 });
 
-// @desc    Update transaction
-// @route   PUT /api/transactions/:id
-// @access  Private
-const updateTransaction = asyncHandler(async (req, res, next) => {
-  let transaction = await Transaction.findById(req.params.id);
-
-  if (!transaction) {
-    return next(new ErrorResponse(`Transaction not found with id of ${req.params.id}`, 404));
-  }
-
-  // Make sure user is buyer, seller, or admin
-  if (
-    transaction.buyer.toString() !== req.user.id.toString() &&
-    transaction.seller.toString() !== req.user.id.toString() &&
-    req.user.role !== 'admin'
-  ) {
-    return next(new ErrorResponse('Not authorized to update this transaction', 401));
-  }
-
-  transaction = await Transaction.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true
-  });
-
-  res.status(200).json({
-    success: true,
-    data: transaction
-  });
-});
-
-// @desc    Delete transaction
-// @route   DELETE /api/transactions/:id
-// @access  Private/Admin
-const deleteTransaction = asyncHandler(async (req, res, next) => {
+// POST /api/transactions/:id/pay/initiate
+// Initiate payment with provider (store paymentReference, set processing). Provider integration required.
+const initiatePayment = asyncHandler(async (req, res, next) => {
   const transaction = await Transaction.findById(req.params.id);
+  if (!transaction) return next(new ErrorResponse('Transaction not found', 404));
+  if (transaction.buyer.toString() !== req.user.id.toString()) return next(new ErrorResponse('Not authorized', 403));
+  if (transaction.paymentStatus !== 'pending') return next(new ErrorResponse('Payment already initiated or completed', 400));
 
-  if (!transaction) {
-    return next(new ErrorResponse(`Transaction not found with id of ${req.params.id}`, 404));
-  }
+  // Example: call provider SDK here and get providerPayload and paymentReference
+  // const providerPayload = await paymentProvider.createPayment({ amount: transaction.totalAmount, ... });
+  // transaction.paymentDetails = { transactionRef: providerPayload.reference, provider: 'momo' };
+  // transaction.paymentStatus = 'processing';
+  // await transaction.save();
 
-  await transaction.remove();
-
-  res.status(200).json({
-    success: true,
-    data: {}
-  });
-});
-
-// @desc    Get user transactions
-// @route   GET /api/transactions/user/:userId
-// @access  Private
-const getUserTransactions = asyncHandler(async (req, res, next) => {
-  if (req.params.userId !== req.user.id && req.user.role !== 'admin') {
-    return next(new ErrorResponse('Not authorized to view these transactions', 401));
-  }
-
-  const transactions = await Transaction.find({
-    $or: [
-      { buyer: req.params.userId },
-      { seller: req.params.userId }
-    ]
-  })
-    .populate('buyer seller', 'firstName lastName email phone')
-    .populate('products.product', 'name images basePrice')
-    .sort({ createdAt: -1 });
-
-  res.status(200).json({
-    success: true,
-    count: transactions.length,
-    data: transactions
-  });
-});
-
-// @desc    Process payment for transaction
-// @route   POST /api/transactions/process-payment/:id
-// @access  Private/Buyer
-const processPayment = asyncHandler(async (req, res, next) => {
-  const { paymentDetails } = req.body;
-  const transaction = await Transaction.findById(req.params.id);
-
-  if (!transaction) {
-    return next(new ErrorResponse(`Transaction not found with id of ${req.params.id}`, 404));
-  }
-
-  if (transaction.buyer.toString() !== req.user.id.toString()) {
-    return next(new ErrorResponse('Not authorized to process payment for this transaction', 401));
-  }
-
-  if (transaction.paymentStatus !== 'pending') {
-    return next(new ErrorResponse('Payment already processed', 400));
-  }
-
-  // In a real implementation, we would integrate with payment providers here
-  // For now, we'll simulate the payment processing
-  transaction.paymentDetails = paymentDetails;
-  transaction.paymentStatus = 'completed';
-  transaction.status = 'active';
-
+  // For now, store a placeholder reference and set processing
+  transaction.paymentDetails = transaction.paymentDetails || {};
+  transaction.paymentDetails.transactionRef = `payref_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+  transaction.paymentStatus = 'processing';
   await transaction.save();
 
-  res.status(200).json({
-    success: true,
-    data: transaction
-  });
+  res.status(200).json({ success: true, data: { paymentReference: transaction.paymentDetails.transactionRef } });
 });
 
-module.exports = { getAllTransactions, getTransactionById,  createTransaction, 
-  updateTransaction, 
-  deleteTransaction,
-  getUserTransactions,
-  processPayment}
+// POST /webhooks/payments
+// Provider webhook: verify signature, update transaction, append paymentEvents, release stock on failure
+const paymentWebhook = asyncHandler(async (req, res) => {
+  // raw body or req.body depending on provider; verify signature
+  const signature = req.header('X-Signature') || req.header('x-provider-signature');
+  const verified = verifyProviderSignature(req.rawBody || req.body, signature);
+  if (!verified) return res.status(400).send('Invalid signature');
+
+  const payload = req.body;
+  const paymentReference = payload.paymentReference || payload.transactionRef || (payload.data && payload.data.reference);
+  if (!paymentReference) return res.status(400).send('Missing payment reference');
+
+  const tx = await Transaction.findOne({ $or: [{ 'paymentDetails.transactionRef': paymentReference }, { paymentReference }, { paymentReference: paymentReference }] });
+  if (!tx) return res.status(404).send('Transaction not found');
+
+  tx.paymentEvents = tx.paymentEvents || [];
+  tx.paymentEvents.push({ event: payload.status || payload.event || 'unknown', payload, receivedAt: new Date() });
+
+  const status = (payload.status || payload.event || '').toString().toLowerCase();
+  if (status.includes('success') || status.includes('completed')) {
+    tx.paymentStatus = 'completed';
+    tx.status = 'completed';
+    // update seller/buyer stats
+    await User.findByIdAndUpdate(tx.buyer, { $inc: { totalPurchases: tx.totalAmount } }).exec();
+    await User.findByIdAndUpdate(tx.seller, { $inc: { totalSales: tx.totalAmount } }).exec();
+  } else if (status.includes('failed') || status.includes('cancel')) {
+    tx.paymentStatus = 'failed';
+    tx.status = 'cancelled';
+    // release reserved stock
+    for (const p of tx.products) {
+      try { await Product.releaseStock(p.product, p.quantity); } catch (e) { /* log */ }
+    }
+  } else {
+    tx.paymentStatus = 'processing';
+  }
+
+  await tx.save();
+  res.status(200).send('ok');
+});
+
+// GET /api/transactions (admin) with pagination
+const getAllTransactions = asyncHandler(async (req, res, next) => {
+  if (req.user.role !== 'admin') return next(new ErrorResponse('Not authorized', 403));
+  const page = Math.max(1, parseInt(req.query.page || '1', 10));
+  const limit = Math.min(100, parseInt(req.query.limit || '25', 10));
+  const skip = (page - 1) * limit;
+
+  const [transactions, total] = await Promise.all([
+    Transaction.find().populate('buyer seller', 'firstName lastName email phone').populate('products.product', 'title images price').sort({ createdAt: -1 }).skip(skip).limit(limit),
+    Transaction.countDocuments()
+  ]);
+
+  res.status(200).json({ success: true, page, limit, total, count: transactions.length, data: transactions });
+});
+
+// GET /api/transactions/:id
+const getTransactionById = asyncHandler(async (req, res, next) => {
+  const transaction = await Transaction.findById(req.params.id).populate('buyer seller', 'firstName lastName email phone').populate('products.product', 'title images price');
+  if (!transaction) return next(new ErrorResponse('Transaction not found', 404));
+  if (transaction.buyer.toString() !== req.user.id.toString() && transaction.seller.toString() !== req.user.id.toString() && req.user.role !== 'admin') {
+    return next(new ErrorResponse('Not authorized to view this transaction', 403));
+  }
+  res.status(200).json({ success: true, data: sanitizeTransaction(transaction) });
+});
+
+// PUT /api/transactions/:id  (partial updates; whitelist fields)
+const updateTransaction = asyncHandler(async (req, res, next) => {
+  const allowed = ['deliveryStatus', 'deliveryDate', 'rating', 'review', 'status'];
+  const updates = {};
+  for (const k of allowed) if (k in req.body) updates[k] = req.body[k];
+
+  const tx = await Transaction.findById(req.params.id);
+  if (!tx) return next(new ErrorResponse('Transaction not found', 404));
+  if (req.user.role !== 'admin' && req.user.id !== tx.buyer.toString() && req.user.id !== tx.seller.toString()) {
+    return next(new ErrorResponse('Not authorized to update this transaction', 403));
+  }
+
+  Object.assign(tx, updates);
+  await tx.save();
+  res.status(200).json({ success: true, data: sanitizeTransaction(tx) });
+});
+
+// DELETE /api/transactions/:id  (admin only -> soft delete)
+const deleteTransaction = asyncHandler(async (req, res, next) => {
+  if (req.user.role !== 'admin') return next(new ErrorResponse('Not authorized', 403));
+  const tx = await Transaction.findById(req.params.id);
+  if (!tx) return next(new ErrorResponse('Transaction not found', 404));
+  tx.isArchived = true;
+  tx.status = 'cancelled';
+  // release stock if pending
+  if (tx.paymentStatus !== 'completed') {
+    for (const p of tx.products) {
+      try { await Product.releaseStock(p.product, p.quantity); } catch (e) { /* log */ }
+    }
+  }
+  await tx.save();
+  res.status(200).json({ success: true, data: {} });
+});
+
+module.exports = {
+  createTransaction,
+  initiatePayment,
+  paymentWebhook,
+  getAllTransactions,
+  getTransactionById,
+  updateTransaction,
+  deleteTransaction
+};

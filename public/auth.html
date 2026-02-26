@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Login - AgriMarket</title>
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/components.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/">AgriMarket</a>
+  </header>
+
+  <main class="container">
+    <div class="card" style="max-width:520px;margin:24px auto">
+      <h2>Sign in</h2>
+      <form id="loginForm" class="form">
+        <label>Email<input id="email" type="email" required /></label>
+        <label>Password<input id="password" type="password" required /></label>
+        <div style="margin-top:12px">
+          <button class="btn" type="submit">Sign in</button>
+          <a class="btn ghost" href="/">Cancel</a>
+        </div>
+      </form>
+      <p class="small" style="margin-top:12px">Demo accounts: <strong>amina.buyer@example.com</strong>, <strong>jean.farmer@example.com</strong>, <strong>grace.admin@example.com</strong> (Password123!)</p>
+    </div>
+  </main>
+
+  <script type="module" src="/js/auth.js"></script>
+</body>
+</html>

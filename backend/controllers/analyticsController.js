@@ -3,6 +3,9 @@ const User = require('../models/User');
 const Product = require('../models/Product');
 const Transaction = require('../models/Transaction');
 const Message = require('../models/Message');
+const Escrow = require('../models/Escrow');
+const Logistics = require('../models/Logistics');
+const Dispute = require('../models/Dispute');
 const ErrorResponse = require('../utils/errorResponse');
 
 // @desc    Get user analytics (for farmer/buyer)
@@ -13,35 +16,23 @@ const getUserAnalytics = asyncHandler(async (req, res, next) => {
   const userRole = req.user.role;
 
   if (userRole === 'farmer') {
-    // Farmer analytics
     const [products, transactions, messages] = await Promise.all([
       Product.countDocuments({ seller: userId }),
-      Transaction.find({
-        seller: userId
-      }).populate('buyer', 'firstName lastName'),
-      Message.countDocuments({
-        $or: [
-          { sender: userId },
-          { receiver: userId }
-        ]
-      })
+      Transaction.find({ seller: userId }).populate('buyer', 'firstName lastName'),
+      Message.countDocuments({ $or: [{ sender: userId }, { receiver: userId }] })
     ]);
 
-    // Calculate sales metrics
     let totalSales = 0;
     let totalEarnings = 0;
     let monthlySales = {};
-    
+
     transactions.forEach(transaction => {
       if (transaction.paymentStatus === 'completed') {
         totalSales += transaction.products.reduce((sum, product) => sum + product.quantity, 0);
         totalEarnings += transaction.totalAmount;
-        
-        // Group by month for chart data
+
         const month = new Date(transaction.createdAt).toISOString().slice(0, 7);
-        if (!monthlySales[month]) {
-          monthlySales[month] = { sales: 0, earnings: 0 };
-        }
+        if (!monthlySales[month]) monthlySales[month] = { sales: 0, earnings: 0 };
         monthlySales[month].sales += transaction.products.reduce((sum, product) => sum + product.quantity, 0);
         monthlySales[month].earnings += transaction.totalAmount;
       }
@@ -54,35 +45,24 @@ const getUserAnalytics = asyncHandler(async (req, res, next) => {
         totalSales,
         totalEarnings,
         totalMessages: messages,
-        monthlySales: Object.entries(monthlySales).map(([month, data]) => ({
-          month,
-          sales: data.sales,
-          earnings: data.earnings
-        })),
+        monthlySales: Object.entries(monthlySales).map(([month, data]) => ({ month, sales: data.sales, earnings: data.earnings })),
         recentTransactions: transactions.slice(0, 5)
       }
     });
   } else if (userRole === 'buyer') {
-    // Buyer analytics
-    const transactions = await Transaction.find({
-      buyer: userId
-    }).populate('seller', 'firstName lastName farmName');
+    const transactions = await Transaction.find({ buyer: userId }).populate('seller', 'firstName lastName farmName');
 
-    // Calculate purchase metrics
     let totalPurchases = 0;
     let totalSpent = 0;
     let monthlyPurchases = {};
-    
+
     transactions.forEach(transaction => {
       if (transaction.paymentStatus === 'completed') {
         totalPurchases += transaction.products.reduce((sum, product) => sum + product.quantity, 0);
         totalSpent += transaction.totalAmount;
-        
-        // Group by month for chart data
+
         const month = new Date(transaction.createdAt).toISOString().slice(0, 7);
-        if (!monthlyPurchases[month]) {
-          monthlyPurchases[month] = { purchases: 0, spent: 0 };
-        }
+        if (!monthlyPurchases[month]) monthlyPurchases[month] = { purchases: 0, spent: 0 };
         monthlyPurchases[month].purchases += transaction.products.reduce((sum, product) => sum + product.quantity, 0);
         monthlyPurchases[month].spent += transaction.totalAmount;
       }
@@ -94,19 +74,12 @@ const getUserAnalytics = asyncHandler(async (req, res, next) => {
         totalPurchases,
         totalSpent,
         transactionCount: transactions.length,
-        monthlyPurchases: Object.entries(monthlyPurchases).map(([month, data]) => ({
-          month,
-          purchases: data.purchases,
-          spent: data.spent
-        })),
+        monthlyPurchases: Object.entries(monthlyPurchases).map(([month, data]) => ({ month, purchases: data.purchases, spent: data.spent })),
         recentTransactions: transactions.slice(0, 5)
       }
     });
   } else {
-    res.status(400).json({
-      success: false,
-      message: 'Analytics not available for this role'
-    });
+    res.status(400).json({ success: false, message: 'Analytics not available for this role' });
   }
 });
 
@@ -121,7 +94,11 @@ const getAdminAnalytics = asyncHandler(async (req, res, next) => {
     totalProducts,
     totalTransactions,
     totalMessages,
-    recentTransactions
+    totalEscrows,
+    totalLogistics,
+    totalDisputes,
+    recentTransactions,
+    recentUsers
   ] = await Promise.all([
     User.countDocuments(),
     User.countDocuments({ role: 'farmer' }),
@@ -129,36 +106,29 @@ const getAdminAnalytics = asyncHandler(async (req, res, next) => {
     Product.countDocuments(),
     Transaction.countDocuments(),
     Message.countDocuments(),
-    Transaction.find()
-      .populate('buyer seller', 'firstName lastName')
-      .sort({ createdAt: -1 })
-      .limit(10)
+    Escrow.countDocuments(),
+    Logistics.countDocuments(),
+    Dispute.countDocuments(),
+    Transaction.find().populate('buyer seller', 'firstName lastName').sort({ createdAt: -1 }).limit(10),
+    User.find().sort({ createdAt: -1 }).limit(5)
   ]);
 
-  // Calculate revenue metrics
   let totalRevenue = 0;
   let monthlyRevenue = {};
-  
   const allTransactions = await Transaction.find({ paymentStatus: 'completed' });
+
   allTransactions.forEach(transaction => {
     totalRevenue += transaction.totalAmount;
-    
-    // Group by month for chart data
     const month = new Date(transaction.createdAt).toISOString().slice(0, 7);
-    if (!monthlyRevenue[month]) {
-      monthlyRevenue[month] = 0;
-    }
+    if (!monthlyRevenue[month]) monthlyRevenue[month] = 0;
     monthlyRevenue[month] += transaction.totalAmount;
   });
 
-  // Calculate user growth
   let userGrowth = {};
   const users = await User.find().sort({ createdAt: 1 });
   users.forEach(user => {
     const month = new Date(user.createdAt).toISOString().slice(0, 7);
-    if (!userGrowth[month]) {
-      userGrowth[month] = 0;
-    }
+    if (!userGrowth[month]) userGrowth[month] = 0;
     userGrowth[month]++;
   });
 
@@ -171,16 +141,14 @@ const getAdminAnalytics = asyncHandler(async (req, res, next) => {
       totalProducts,
       totalTransactions,
       totalMessages,
+      totalEscrows,
+      totalLogistics,
+      totalDisputes,
       totalRevenue,
-      monthlyRevenue: Object.entries(monthlyRevenue).map(([month, revenue]) => ({
-        month,
-        revenue
-      })),
-      userGrowth: Object.entries(userGrowth).map(([month, count]) => ({
-        month,
-        count
-      })),
-      recentTransactions
+      monthlyRevenue: Object.entries(monthlyRevenue).map(([month, revenue]) => ({ month, revenue })),
+      userGrowth: Object.entries(userGrowth).map(([month, count]) => ({ month, count })),
+      recentTransactions,
+      recentUsers
     }
   });
 });
@@ -193,15 +161,11 @@ const getProductAnalytics = asyncHandler(async (req, res, next) => {
   const userRole = req.user.role;
 
   if (userRole !== 'farmer') {
-    return res.status(400).json({
-      success: false,
-      message: 'Product analytics only available for farmers'
-    });
+    return res.status(400).json({ success: false, message: 'Product analytics only available for farmers' });
   }
 
   const products = await Product.find({ seller: userId });
-  
-  // Calculate product performance
+
   const productPerformance = products.map(product => ({
     _id: product._id,
     name: product.name,
@@ -212,17 +176,11 @@ const getProductAnalytics = asyncHandler(async (req, res, next) => {
     rating: product.ratings.average
   }));
 
-  // Get top performing products
-  const topProducts = [...productPerformance]
-    .sort((a, b) => b.revenue - a.revenue)
-    .slice(0, 5);
+  const topProducts = [...productPerformance].sort((a, b) => b.revenue - a.revenue).slice(0, 5);
 
-  // Get category distribution
   const categoryDistribution = {};
   products.forEach(product => {
-    if (!categoryDistribution[product.category]) {
-      categoryDistribution[product.category] = { count: 0, revenue: 0 };
-    }
+    if (!categoryDistribution[product.category]) categoryDistribution[product.category] = { count: 0, revenue: 0 };
     categoryDistribution[product.category].count++;
     categoryDistribution[product.category].revenue += product.soldCount * product.basePrice;
   });
@@ -238,7 +196,7 @@ const getProductAnalytics = asyncHandler(async (req, res, next) => {
   });
 });
 
-module.exports = {  getUserAnalytics, 
-  getAdminAnalytics,
-  getProductAnalytics
-}
+module.exports = {
+   getUserAnalytics, 
+   getAdminAnalytics, 
+   getProductAnalytics };

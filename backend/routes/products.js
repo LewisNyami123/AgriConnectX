@@ -1,37 +1,26 @@
 // routes/products.js
 const express = require('express');
+const { validationResult } = require('express-validator');
 const router = express.Router();
-const {
-  getAllProducts,
-  getProductById,
-  createProduct,
-  updateProduct,
-  deleteProduct,
-  getProductsByCategory,
-  getProductsByLocation,
-  searchProducts
-} = require('../controllers/productController');
 
-const { protect, authorize } = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
+const productController = require('../controllers/productController');
+const validators = require('../validators/productValidator');
 
-// Public routes
-router.route('/')
-  .get(getAllProducts)
-  .post(protect, authorize('farmer'), createProduct);
+function handleValidation(req, res, next) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
+  next();
+}
 
-router.route('/search')
-  .get(searchProducts);
+router.get('/', validators.pagination, handleValidation, productController.getAllProducts);
+router.get('/search', productController.searchProducts);
+router.get('/category/:category', productController.getProductsByCategory);
+router.get('/location/:location', productController.getProductsByLocation);
+router.get('/:id', productController.getProductById);
 
-router.route('/category/:category')
-  .get(getProductsByCategory);
-
-router.route('/location/:location')
-  .get(getProductsByLocation);
-
-// Keep parameter routes last to avoid conflicts
-router.route('/:id')
-  .get(getProductById)
-  .put(protect, authorize('farmer'), updateProduct)
-  .delete(protect, authorize('farmer'), deleteProduct);
+router.post('/', protect, validators.createProduct, handleValidation, productController.createProduct);
+router.put('/:id', protect, validators.updateProduct, handleValidation, productController.updateProduct);
+router.delete('/:id', protect, productController.deleteProduct);
 
 module.exports = router;
