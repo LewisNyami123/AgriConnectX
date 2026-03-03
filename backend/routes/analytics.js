@@ -1,6 +1,9 @@
 // routes/analytics.js
 const express = require('express');
 const router = express.Router();
+const Escrow = require('../models/Escrow');
+const Logistics = require('../models/Logistics');
+const Dispute = require('../models/Dispute');
 const {
   getUserAnalytics,
   getAdminAnalytics,
@@ -20,5 +23,21 @@ router.route('/products')
 // Admin analytics
 router.route('/admin')
   .get(protect, authorize('admin'), getAdminAnalytics);
+
+  router.get("/escrow", protect, authorize("admin"), async (req, res) => {
+  const escrows = await Escrow.find();
+  res.json({ success: true, data: escrows });
+});
+
+router.get("/logistics", protect, authorize("admin"), async (req, res) => {
+  const logistics = await Logistics.find();
+  res.json({ success: true, data: logistics });
+});
+
+router.get("/disputes", protect, authorize("admin"), async (req, res) => {
+  const disputes = await Dispute.find();
+  res.json({ success: true, data: disputes });
+});
+
 
 module.exports = router;

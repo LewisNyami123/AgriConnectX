@@ -1,35 +1,17 @@
+// app.js
 import { loadRoute } from "./router.js";
+// import { getToken, getUser } from "./state.js";
 
-document.querySelectorAll(".menu li").forEach(item=>{
-    item.addEventListener("click", ()=>{
-        document.querySelectorAll(".menu li").forEach(i=>i.classList.remove("active"));
-        item.classList.add("active");
+// Sidebar navigation
+document.querySelectorAll(".menu li").forEach(item => {
+  item.addEventListener("click", () => {
+    document.querySelectorAll(".menu li").forEach(i => i.classList.remove("active"));
+    item.classList.add("active");
 
-        const route = item.getAttribute("data-route");
-        loadRoute(route);
-    });
+    const route = item.getAttribute("data-route");
+    loadRoute(route); // load the selected route
+  });
 });
 
+// Load dashboard by default
 loadRoute("dashboard");
-
-// Modal Elements
-const userModal = document.getElementById("addUserModal");
-const usersMenu = document.getElementById("usersMenu");
-const closeUserModal = document.getElementById("closeUserModal");
-
-// Open Modal
-usersMenu.addEventListener("click", () => {
-  userModal.classList.add("active");
-});
-
-// Close Modal
-closeUserModal.addEventListener("click", () => {
-  userModal.classList.remove("active");
-});
-
-// Close if clicking outside content
-window.addEventListener("click", (e) => {
-  if (e.target === userModal) {
-    userModal.classList.remove("active");
-  }
-});

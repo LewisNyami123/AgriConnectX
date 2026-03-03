@@ -42,6 +42,11 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
+const path = require('path');
+
+// Serve static files from Agri/component
+app.use(express.static(path.join(__dirname, "component")));
+
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -66,6 +71,10 @@ app.get('/', (req, res) => {
 
 // simple health check for load balancers
 app.get('/health', (req, res) => res.status(200).json({ status: 'ok' }));
+
+
+
+
 
 /* ---------- Error handler ---------- */
 app.use((err, req, res, next) => {
@@ -120,9 +129,14 @@ io.on('connection', (socket) => {
   });
 });
 
+// Fallback for SPA routes (optional)
+// app.get("*", (req, res) => {
+//   res.sendFile(path.join(__dirname, "component/index.html"));
+// });
+
 
 /* ---------- DB connection with retry/backoff ---------- */
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5500;
 const MONGODB_URI = process.env.MONGODB_URI;
 
 const mongooseOptions = {

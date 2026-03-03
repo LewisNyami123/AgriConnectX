@@ -1,16 +1,18 @@
-import { post } from './api.js';
-import { setToken, setUser, clearAuth } from './lib/storage.js';
-
-// LOGIN
-async function login(email, password) {
-  const res = await post('/api/auth/login', { email, password });
+// auth.js
+import { apiPost } from "./api.js";
+import { setToken, setUser } from "./lib/storage.js";
+//Login function
+export async function login(email, password) {
+  const res = await apiPost("/api/auth/login", { email, password });
   if (res.success && res.accessToken) {
     setToken(res.accessToken);
+     console.log("Saved token:", res.accessToken);
     setUser(res.user);
+    setUser(res.user.id )
     return res.user;
+   
   }
-  throw new Error(res.message || 'Login failed');
-  
+  throw new Error(res.message || "Login failed");
 }
 
 // REGISTER
