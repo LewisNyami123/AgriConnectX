@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="style/styles.css">
      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
      <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+     <link rel="canonical" href="https://getbootstrap.com/docs/5.0/examples/features/">
+       <!-- Bootstrap core CSS -->
+<link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
    <!-- header section -->
@@ -20,12 +23,12 @@
     <nav class="nav" id="mainNav">
                 <ul>
                     <li><a href="#home"><i class="fas fa-home"></i>Home</a></li>
-                    <li><a href="#marketplace"><i class="fas fa-shop"></i>Marketplace</a></li>
-                    <li><a href="#resources"><i class="fas fa-book"></i>Resources</a></li>
+                    <!-- <li><a href="#marketplace"><i class="fas fa-shop"></i>Marketplace</a></li>
+                    <li><a href="#resources"><i class="fas fa-book"></i>Resources</a></li> -->
                     <li><a href="#about"><i class="fas fa-user"></i>About Us</a></li>
                     <li><a href="#contact"><i class="fas fa-phone"></i>Contact Us</a></li>
                     <li><a href="auth.html" id="loginBtn"><i class="fas fa-sign-in-alt"></i>Login</a></li>
-                    <li><a href="auth.html" id="registerBtn"><i class="fas fa-sign-in-alt"></i>Sign Up</a></li>
+                  
                 </ul>
             </nav>
             
@@ -121,39 +124,62 @@
                 <li><i class="fas fa-arrow"></i>Variety of Agricultural products</li>
                 </ul>
                 </div>
-                <div class="video-placeholder">
-                       <video src="assets/videoplayback.mp4" controls loop></video>
-                    </div>
-                    <button type="button" class="btn">Explore More</button>
-            </div>
+         </div>
+            
     </section>
     
      <!-- Marketplace Preview -->
-    <section id="marketplace" class="marketplace-preview">
-        <div class="container">
-            <h2>Popular Products</h2>
-            <div class="products-container" id="productsContainer">
+    <!-- <section id="marketplace" class="marketplace-preview"> -->
+        <!-- <div class="container"> -->
+            <!-- <h2>Popular Products</h2> -->
+            <!-- <div class="products-container" id="productsContainer"> -->
                 <!-- Products will be loaded here dynamically -->
-            </div>
-            <div class="view-all-btn">
-                <a href="marketplace.html" class="btn btn-outline">View All Products</a>
-            </div>
-        </div>
-    </section>
+            <!-- </div> -->
+            <!-- <div class="view-all-btn"> -->
+                <!-- <a href="marketplace.html" class="btn btn-outline">View All Products</a> -->
+            <!-- </div> -->
+        <!-- </div> -->
+    <!-- </section> -->
 
     <!-- Resources Preview -->
-    <section id="resources" class="resources-preview">
-        <div class="container">
-            <h2>Agricultural Resources</h2>
-            <div class="resources-container" id="resourcesContainer">
+    <!-- <section id="resources" class="resources-preview"> -->
+        <!-- //<div class="container"> -->
+            <!-- <h2>Agricultural Resources</h2> -->
+            <!-- <div class="resources-container" id="resourcesContainer"> -->
                 <!-- Resources will be loaded here dynamically -->
-            </div>
-            <div class="view-all-btn">
+            <!-- </div> -->
+            <!-- <div class="view-all-btn">
                 <a href="resources.html" class="btn btn-outline">View All Resources</a>
             </div>
-        </div>
-    </section>
+        </div> -->
+    <!-- </section> --><section class="map-section">
+  <h2>Find Farmers Near You</h2>
 
+  <div class="map-container">
+    <iframe
+      src="https://www.google.com/maps?q=Douala,Cameroon&output=embed"
+      width="100%"
+      height="450"
+      style="border:0;"
+      allowfullscreen=""
+      loading="lazy">
+    </iframe>
+  </div>
+</section>
+   <div class="footer-section" id="contact">
+                            <h4>Contact</h4>
+                            <form action="mailto:lewisnyami2@gmail.com" method="post" enctype="text/plain">
+                            Name:<br>
+                            <input type="text" name="name"><br>
+                            Email:<br>
+                            <input type="email" name="email"><br>
+                            Message:<br>
+                            <textarea name="message"></textarea><br><br>
+                            <button type="submit">send</button>
+                            </form>
+                            <p>Email: info@agriconnectx.cm</p>
+                            <p>Phone: +237 652 70 13 00</p>
+                </div>
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
@@ -171,20 +197,7 @@
                         <li><a href="#about">About Us</a></li>
                     </ul>
                 </div>
-                <div class="footer-section" id="contact">
-                    <h4>Contact</h4>
-                    <form action="mailto:lewisnyami2@gmail.com" method="post" enctype="text/plain">
-                       Name:<br>
-                    <input type="text" name="name"><br>
-                    Email:<br>
-                    <input type="email" name="email"><br>
-                    Message:<br>
-                    <textarea name="message"></textarea><br><br>
-                    <input type="submit" value="Send">
-                    </form>
-                    <p>Email: info@agriconnectx.cm</p>
-                    <p>Phone: +237 652 70 13 00</p>
-                </div>
+               
                 <div class="contact-icons">
                     <a href="https://whatsapp.com/683394605" >                                         
                 <i class="fab fa-whatsapp"></i>

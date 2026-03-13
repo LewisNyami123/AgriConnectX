@@ -1,56 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Buyer | AgriConnectX</title>
+
+<title>Buyer Dashboard | AgriConnectX</title>
 
 <link rel="stylesheet" href="../style/buyer.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 </head>
 
 <body>
 
-<div class="dashboard">
+<!-- NAVBAR -->
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-      <div class="logo">
-          <h2>AgriConnectX</h2>
-          <span>Buyer Panel</span>
-      </div>
+<header class="navbar">
 
-      <ul class="menu">
-          <li data-route="overview" class="active"><i class="fas fa-chart-pie"></i> Overview</li>
-          <li data-route="products"><i class="fas fa-store"></i> Browse Products</li>
-          <li data-route="orders"><i class="fas fa-shopping-bag"></i> My Orders</li>
-          <li data-route="bids"><i class="fas fa-gavel"></i> Bulk Requests</li>
-          <li data-route="tracking"><i class="fas fa-truck-moving"></i> Shipment Tracking</li>
-          <li data-route="wallet"><i class="fas fa-wallet"></i> Wallet</li>
-          <li data-route="messages"><i class="fas fa-comments"></i> Messages</li>
-          <li data-route="profile"><i class="fas fa-user"></i> Profile</li>
-      </ul>
+<div class="nav-left">
 
-      <button id="logoutBtn">Logout</button>
-  </aside>
+<h2 class="logo">AgriConnectX</h2>
 
-  <!-- MAIN -->
-  <main class="main">
-
-      <header class="topbar">
-          <h1 id="pageTitle">Overview</h1>
-          <div class="profile">
-              <img src="https://i.pravatar.cc/100">
-              <span>Buyer</span>
-          </div>
-      </header>
-
-      <section id="appContent"></section>
-
-  </main>
+<input type="text" placeholder="Search farm products..." class="search">
 
 </div>
+
+<div class="nav-right">
+
+<a data-route="products">
+<i class="fas fa-store"></i>
+Products
+</a>
+
+<a data-route="orders">
+<i class="fas fa-shopping-bag"></i>
+Orders
+</a>
+
+<a data-route="messages">
+<i class="fas fa-comments"></i>
+Messages
+</a>
+
+<div class="notifications">
+<i class="fas fa-bell"></i>
+<span class="badge">2</span>
+</div>
+
+<div class="cart-icon">
+<i class="fas fa-shopping-cart"></i>
+<span id="cartCount">0</span>
+</div>
+
+<div class="profile">
+<img src="https://i.pravatar.cc/100">
+<span>Buyer</span>
+</div>
+
+<button id="logoutBtn">
+<i class="fas fa-sign-out-alt"></i>
+</button>
+
+</div>
+
+</header>
+
+<!-- MAIN CONTENT -->
+
+<main>
+
+<h1 id="pageTitle">Browse Products</h1>
+
+<section id="appContent">
+
+<div class="loading">
+<i class="fas fa-spinner fa-spin"></i>
+<p>Loading content...</p>
+</div>
+
+</section>
+
+</main>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="./js/buyer.js"></script>
+
+<script type="module" src="./js/buyer.js"></script>
+
 </body>
 </html>

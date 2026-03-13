@@ -27,6 +27,7 @@ const productSchema = new mongoose.Schema({
   isActive: { type: Boolean, default: true, index: true },
   isFeatured: { type: Boolean, default: false, index: true },
   isArchived: { type: Boolean, default: false },
+  isVerified: { type: Boolean, default: false, index: true },
   views: { type: Number, default: 0 },
   rating: {
     average: { type: Number, default: 0 },

@@ -1,11 +1,24 @@
 // models/Logistics.js
-const mongoose = require("mongoose");
-
+const mongoose = require('mongoose')
 const LogisticsSchema = new mongoose.Schema({
-  transaction: { type: mongoose.Schema.Types.ObjectId, ref: "Transaction" },
-  transporter: { type: String },
-  status: { type: String, enum: ["pending", "in-transit", "delivered"], default: "pending" },
-  createdAt: { type: Date, default: Date.now }
-});
 
-module.exports = mongoose.model("Logistics", LogisticsSchema);
+ transaction: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "Transaction",
+  required: true
+ },
+
+ transporter: String,
+ trackingNumber: String,
+
+ status: {
+  type: String,
+  enum: ["pending", "in-transit", "delivered"],
+  default: "pending"
+ },
+
+ deliveryAddress: String
+
+}, { timestamps: true });
+
+module.exports = mongoose.model('Logistics', LogisticsSchema)

@@ -35,43 +35,43 @@
 
                     <!-- Register Form -->
                     <form id="registerForm" class="auth-form">
-                        <h3>Create an Account</h3>
-                        <div class="form-row">
-                            <div class="form-group half">
-                                <input type="text" id="firstName" placeholder="First Name" required>
-                            </div>
-                            <div class="form-group half">
-                                <input type="text" id="lastName" placeholder="Last Name" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <input type="email" id="registerEmail" placeholder="Email" required>
-                        </div>
-                        <div class="form-group">
-                            <input type="tel" id="phone" placeholder="Phone Number" required>
-                        </div>
-                        <div class="form-group">
-                            <input type="password" id="registerPassword" placeholder="Password" required>
-                        </div>
-                        <div class="form-group">
-                            <select id="role" required>
-                                <option value="">Select Role</option>
-                                <option value="farmer">Farmer</option>
-                                <option value="buyer">Buyer</option>
-                            </select>
-                        </div>
-                        <div id="farmerFields" style="display: none;">
-                            <div class="form-group">
-                                <input type="text" id="farmName" placeholder="Farm Name">
-                            </div>
-                            <div class="form-group">
-                                <input type="text" id="farmLocation" placeholder="Farm Location">
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Register</button>
-                        <p class="switch-form">Already have an account? <a href="#" id="showLogin">Login</a></p>
-                       
-                    </form>
+    <h3>Create an Account</h3>
+    <div class="form-row">
+        <div class="form-group half">
+            <input type="text" id="firstName" placeholder="First Name" autocomplete="given-name" required>
+        </div>
+        <div class="form-group half">
+            <input type="text" id="lastName" placeholder="Last Name" autocomplete="family-name" required>
+        </div>
+    </div>
+    <div class="form-group">
+        <input type="email" id="registerEmail" placeholder="Email" autocomplete="email" required>
+    </div>
+    <div class="form-group">
+        <input type="tel" id="phone" placeholder="Phone Number" autocomplete="tel" required>
+    </div>
+    <div class="form-group">
+        <input type="password" id="registerPassword" placeholder="Password" autocomplete="new-password" required>
+    </div>
+    <div class="form-group">
+        <select id="role" required>
+            <option value="">Select Role</option>
+            <option value="farmer">Farmer</option>
+            <option value="buyer">Buyer</option>
+        </select>
+    </div>
+    <div id="farmerFields" style="display: none;">
+        <div class="form-group">
+            <input type="text" id="farmName" placeholder="Farm Name" autocomplete="organization-title">
+        </div>
+        <div class="form-group">
+            <input type="text" id="farmLocation" placeholder="Farm Location" autocomplete="address-line1">
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Register</button>
+    <p class="switch-form">Already have an account? <a href="#" id="showLogin">Login</a></p>
+</form>
+
                 </div>
             </div>
         </div>

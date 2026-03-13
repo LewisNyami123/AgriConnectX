@@ -17,7 +17,7 @@ export async function login(email, password) {
 
 // REGISTER
 async function register(payload) {
-  const res = await post('/api/auth/register', payload);
+  const res = await apiPost('/api/auth/register', payload);
   if (res.success) return res.user;
   throw new Error(res.message || 'Registration failed');
 }

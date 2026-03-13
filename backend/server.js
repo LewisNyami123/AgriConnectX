@@ -16,6 +16,11 @@ const transactionRoutes = require('./routes/transactions')
 const messageRoutes = require('./routes/messages');
 const resourceRoutes = require('./routes/resources');
 const analyticsRoutes = require('./routes/analytics');
+const cart = require("./routes/cart");
+const order = require("./routes/order")
+const wishList = require("./routes/wishlist");
+const review = require("./routes/review");
+const notification = require("./routes/notification");
 
 const app = express();
 
@@ -64,6 +69,11 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use("/api/cart", cart);
+app.use("/api/order", order);
+app.use("/api/wishlist", wishList);
+app.use("/api/review", review);
+app.use("/api/notification",notification);
 
 app.get('/', (req, res) => {
   res.json({ message: 'AgriConnectX Cameroon API is running!' });
