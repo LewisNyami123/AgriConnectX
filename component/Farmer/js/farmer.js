@@ -4,7 +4,7 @@ const pageTitle = document.getElementById("pageTitle");
 
 /* API Helper */
 const API_BASE = (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost")
-  ? "http://localhost:5000"
+  ? "http://localhost:5500"
   : "";
 
 async function apiGet(url) {
