@@ -188,7 +188,7 @@ async function updateCartCount() {
   const res = await apiGet("/api/cart");
 
   if (res.success) {
-    cartCount.textContent = res.data.items.length;
+    cartCount.textContent = res.data.items.length();
   }
 }
 
@@ -407,7 +407,8 @@ LOGOUT
 
 document.getElementById("logoutBtn").onclick = () => {
   localStorage.removeItem("token");
-  location.href = "/auth.html";
+  location.href = "/component/auth.html";
+  alert("logout successful");
 };
 
 /* =====================================================

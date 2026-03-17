@@ -154,7 +154,7 @@ function openAddUserModal(){
 
 window.approveFarmer = async function(userId){
 
-  const res = await apiPost(`/api/admin/approve/${userId}`, {});
+  const res = await apiPost(`/api/analytics/admin/approve/${userId}`, {});
 
   if(res.success){
 
@@ -175,7 +175,7 @@ window.deleteUser = async function(userId){
 
   if(!confirmDelete) return;
 
-  const res = await apiPost(`/api/admin/users/delete/${userId}`, {});
+  const res = await apiPost(`/api/admin/analytics/users/delete/${userId}`, {});
 
   if(res.success){
 
@@ -197,7 +197,7 @@ window.editUser = async function(userId){
 
   if(!firstName || !lastName) return;
 
-  const res = await apiPost(`/api/admin/users/edit/${userId}`, {
+  const res = await apiPost(`/api/analytics/users/edit/${userId}`, {
     firstName,
     lastName
   });

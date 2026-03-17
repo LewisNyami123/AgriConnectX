@@ -13,5 +13,11 @@ document.querySelectorAll(".menu li").forEach(item => {
   });
 });
 
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  localStorage.removeItem("token");
+  location.href = '/component/auth.html'
+  alert("Logged out successfully");
+  
+})
 // Load dashboard by default
 loadRoute("dashboard");
