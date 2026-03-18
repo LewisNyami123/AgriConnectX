@@ -46,10 +46,12 @@ app.use((req, res, next) => {
 //   credentials: true,
 // };
 app.use(cors({
-  origin: "https://agri-connect-x.vercel.app", 
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  origin: "https://agri-connect-x.vercel.app", // your Vercel domain
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 }));
+
 
 
 const path = require('path');
