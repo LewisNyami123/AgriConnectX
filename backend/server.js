@@ -41,11 +41,13 @@ app.use((req, res, next) => {
 });
 
 // CORS: restrict in production by setting FRONTEND_URL in .env
-const corsOptions = {
-  origin: ["http://localhost:5500", "http://127.0.0.1:5500"],
-  credentials: true,
-};
-app.use(cors(corsOptions));
+// const corsOptions = {
+//   origin: ["http://localhost:5500", "http://127.0.0.1:5500"],
+//   credentials: true,
+// };
+app.use(cors({
+  origin:"*"
+}));
 
 const path = require('path');
 
