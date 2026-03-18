@@ -3,9 +3,7 @@ const content = document.getElementById("appContent");
 const pageTitle = document.getElementById("pageTitle");
 
 /* API Helper */
-const API_BASE =  window.location.hostname === "localhost"
-    ? "http://localhost:5500"
-    : "https://agriconnectx.onrender.com";
+const API_BASE = "https://agriconnectx.onrender.com";
 ;
 
 async function apiGet(url) {
