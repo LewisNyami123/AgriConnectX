@@ -46,9 +46,11 @@ app.use((req, res, next) => {
 //   credentials: true,
 // };
 app.use(cors({
-  origin: ["https://agri-connect-x.vercel.app/"], // frontend domain
+  origin: "https://agri-connect-x.vercel.app", 
+  methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
+
 
 const path = require('path');
 
