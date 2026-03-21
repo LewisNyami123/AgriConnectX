@@ -9,7 +9,8 @@ export async function apiGet(url) {
     headers: {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {})
-    }
+    },
+    withCredentials:true
   });
   return res.json();
 }
