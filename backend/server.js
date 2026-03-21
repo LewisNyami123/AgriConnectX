@@ -42,21 +42,23 @@ app.use((req, res, next) => {
 
 //CORS: restrict in production by setting FRONTEND_URL in .env
 const corsOptions = {
-  origin: "https://agri-connect-x.vercel.app", // your Vercel frontend
+  origin: ["http://localhost:5500", "http://127.0.0.1:5500", "https://agri-connect-x.vercel.app"],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 };
+app.use(cors(corsOptions));
+
 // app.use(cors({
 //   origin: "https://agri-connect-x.vercel.app", // your Vercel domain
 //   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 //   allowedHeaders: ["Content-Type", "Authorization"],
 //   credentials: true
 // }));
-app.use(cors(corsOptions));
+
 
 // Explicitly handle preflight requests
-app.options("*", cors(corsOptions))
+app.options(/.*/, cors(corsOptions));
 
 
 

@@ -3,7 +3,10 @@ const content = document.getElementById("appContent");
 const pageTitle = document.getElementById("pageTitle");
 
 /* API Helper */
-const API_BASE = "https://agriconnectx.onrender.com";
+const API_BASE = (window.location.hostname === "127.0.0.1")
+  ? "http://localhost:5500"
+  : "https://agriconnectx.onrender.com";
+
 ;
 
 async function apiGet(url) {
@@ -59,7 +62,7 @@ async function loadPage(route) {
         const res = await apiGet("/api/products");
         document.getElementById("availableStock").textContent = `${res.data.length} Products`;
         // Example: active orders
-        const orders = await apiGet("/api/orders/farmer/me");
+        const orders = await apiGet("/api/order");
         document.getElementById("activeOrders").textContent = orders.data.length;
         document.getElementById("totalSales").textContent = orders.data.reduce((sum,o)=>sum+o.amount,0) + " FCFA";
 
@@ -178,7 +181,7 @@ async function loadInventory() {
 /* Orders Functions */
 async function loadOrders() {
   try {
-    const res = await apiGet("/api/orders/farmer/me");
+    const res = await apiGet("/api/order");
     const tbody = document.getElementById("ordersTable");
     tbody.innerHTML = res.data.map(o => `
       <tr>
