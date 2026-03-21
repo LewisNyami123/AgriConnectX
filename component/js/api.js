@@ -24,7 +24,8 @@ export async function apiPost(url, body) {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {})
     },
-    body: JSON.stringify(body)
+    body: JSON.stringify(body),
+    withCredentials:true
   });
   return res.json();
 }

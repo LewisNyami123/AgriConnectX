@@ -3,7 +3,8 @@ import { getToken } from "../state.js";
 const API_BASE = "https://agriconnectx.onrender.com";
 export async function apiGet(url) {
   const res = await fetch(`${API_BASE}${url}`, {
-    headers: { Authorization: `Bearer ${getToken()}` }
+    headers: { Authorization: `Bearer ${getToken()}` },
+    withCredentials:true
   });
   return res.json();
 }

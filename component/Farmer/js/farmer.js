@@ -9,7 +9,8 @@ const API_BASE = "https://agriconnectx.onrender.com";
 async function apiGet(url) {
   const token = localStorage.getItem("token");
   const res = await fetch(`${API_BASE}${url}`, {
-    headers: { Authorization: `Bearer ${token}` }
+    headers: { Authorization: `Bearer ${token}` },
+    withCredentials:true
   });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   return res.json();
@@ -23,7 +24,8 @@ async function apiPost(url, body) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`
     },
-    body: JSON.stringify(body)
+    body: JSON.stringify(body),
+    withCredetials:true
   });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   return res.json();
