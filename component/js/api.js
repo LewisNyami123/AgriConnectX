@@ -1,7 +1,7 @@
 // api.js
 import { getToken } from "./lib/storage.js";
 
-const API_BASE = (window.location.hostname === "127.0.0.1")
+const API_BASE = (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost")
   ? "http://localhost:5500"
   : "https://agriconnectx.onrender.com";
 
