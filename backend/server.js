@@ -58,7 +58,7 @@ app.options("*", cors(corsOptions));
 
 
 // Explicitly handle preflight requests
-app.options(/.*/, cors(corsOptions));
+// app.options(/.*/, cors(corsOptions));
 
 
 
