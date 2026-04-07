@@ -3,18 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buyer Dashboard | AgriConnectX</title>
-    
+    <title>AgriConnectX - Fresh from Farmers</title>
     <link rel="stylesheet" href="../style/buyer.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<!-- NAVBAR -->
 <header class="navbar">
     <div class="nav-left">
         <h2 class="logo">AgriConnectX</h2>
-        <input type="text" id="searchInput" placeholder="Search fresh produce, maize, cassava..." class="search">
+        <div class="location">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>Centre Region, Cameroon</span>
+        </div>
+    </div>
+
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search maize, cassava, tomatoes, eggs..." class="search">
+        <button class="search-btn"><i class="fas fa-search"></i></button>
     </div>
 
     <div class="nav-right">
@@ -22,13 +29,10 @@
             <i class="fas fa-store"></i> Marketplace
         </a>
         <a href="#" data-route="orders" class="nav-link">
-            <i class="fas fa-shopping-bag"></i> My Orders
+            <i class="fas fa-shopping-bag"></i> Orders
         </a>
         <a href="#" data-route="wishlist" class="nav-link">
             <i class="fas fa-heart"></i> Wishlist
-        </a>
-        <a href="#" data-route="messages" class="nav-link">
-            <i class="fas fa-comments"></i> Messages
         </a>
 
         <div class="notifications">
@@ -43,16 +47,15 @@
 
         <div class="profile">
             <img src="https://i.pravatar.cc/100" alt="Profile">
-            <span id="buyerName">Buyer</span>
+            <span id="buyerName">Bob</span>
         </div>
 
-        <button id="logoutBtn">
+        <button id="logoutBtn" class="logout-btn">
             <i class="fas fa-sign-out-alt"></i>
         </button>
     </div>
 </header>
 
-<!-- MAIN CONTENT -->
 <main>
     <h1 id="pageTitle">Marketplace - Fresh from Local Farmers</h1>
     <section id="appContent"></section>

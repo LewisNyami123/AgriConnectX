@@ -277,13 +277,20 @@ async function loadPage(route) {
 async function loadInventory() {
     try {
         const res = await apiGet("/api/products");
+        console.log("Farmer Products Response:", res);   // Debug
+
         const tbody = document.getElementById("inventoryTable");
-        tbody.innerHTML = (res.data || []).map(p => `
+        if (!res.data || res.data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5">No products yet. Add your first farm produce!</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = res.data.map(p => `
             <tr>
-                <td>${p.name}</td>
+                <td>${p.title || p.name}</td>
                 <td>${p.quantity}</td>
                 <td>${p.price} FCFA</td>
-                <td><span class="status available">Available</span></td>
+                <td><span class="status available">${p.isActive ? "Available" : "Inactive"}</span></td>
                 <td>
                     <button onclick="editProduct('${p._id}')">Edit</button>
                     <button onclick="deleteProduct('${p._id}')">Delete</button>
@@ -291,10 +298,11 @@ async function loadInventory() {
             </tr>
         `).join("");
     } catch (err) {
-        console.error("Failed to load inventory:", err);
+        console.error("Load Inventory Error:", err);
+        const tbody = document.getElementById("inventoryTable");
+        tbody.innerHTML = `<tr><td colspan="5" style="color:red;">Error loading products</td></tr>`;
     }
 }
-
 function showAddProductForm() {
     document.getElementById("addProductForm").style.display = "block";
 }
