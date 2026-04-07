@@ -1,55 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Farmer | AgriConnectX</title>
-
-<link rel="stylesheet" href="../style/farmer.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriConnectX - Farmer Dashboard</title>
+    <link rel="stylesheet" href="../style/farmer.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-
 <body>
 
 <div class="dashboard">
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-      <div class="logo">
-          <h2>AgriConnectX</h2>
-          <span>Farmer Panel</span>
-      </div>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="logo">
+            <h2>AgriConnectX</h2>
+            <span>Farmer Dashboard</span>
+        </div>
 
-      <ul class="menu">
-          <li data-route="overview" class="active"><i class="fas fa-chart-pie"></i> Overview</li>
-          <li data-route="inventory"><i class="fas fa-seedling"></i> Inventory</li>
-          <li data-route="orders"><i class="fas fa-shopping-cart"></i> Orders</li>
-          <li data-route="wallet"><i class="fas fa-wallet"></i> Wallet</li>
-          <li data-route="advisory"><i class="fas fa-cloud-sun"></i> Advisory</li>
-          <li data-route="messages"><i class="fas fa-comments"></i> Messages</li>
-          <li data-route="profile"><i class="fas fa-user"></i> Profile</li>
-      </ul>
+        <ul class="menu">
+            <li data-route="overview" class="active"><i class="fas fa-chart-pie"></i> Overview</li>
+            <li data-route="inventory"><i class="fas fa-seedling"></i> Inventory</li>
+            <li data-route="orders"><i class="fas fa-shopping-cart"></i> Orders</li>
+            <li data-route="wallet"><i class="fas fa-wallet"></i> Wallet</li>
+            <li data-route="analytics"><i class="fas fa-chart-line"></i> Analytics</li>
+            <li data-route="advisory"><i class="fas fa-cloud-sun"></i> Advisory</li>
+            <li data-route="messages"><i class="fas fa-comments"></i> Messages</li>
+            <li data-route="profile"><i class="fas fa-user"></i> Profile</li>
+        </ul>
 
-      <button id="logoutBtn">Logout</button>
-  </aside>
+        <button id="logoutBtn" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+    </aside>
 
-  <!-- MAIN -->
-  <main class="main">
+    <!-- MAIN CONTENT -->
+    <main class="main">
+        <header class="topbar">
+            <h1 id="pageTitle">Overview</h1>
+            
+            <div class="topbar-right">
+                <div class="notification-bell">
+                    <i class="fas fa-bell"></i>
+                    <span id="notifCount" class="badge">3</span>
+                </div>
+                <div class="profile">
+                    <img src="https://i.pravatar.cc/100" alt="Profile">
+                    <div>
+                        <span id="farmerName">Loading...</span>
+                        <small id="farmerLocation">Cameroon</small>
+                    </div>
+                </div>
+            </div>
+        </header>
 
-      <header class="topbar">
-          <h1 id="pageTitle">Overview</h1>
-          <div class="profile">
-              <img src="https://i.pravatar.cc/100">
-              <span>Farmer</span>
-          </div>
-      </header>
-
-      <section id="appContent"></section>
-
-  </main>
-
+        <section id="appContent" class="content-area"></section>
+    </main>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script  src="./js/farmer.js"></script>
+<script src="./js/farmer.js"></script>
 </body>
 </html>

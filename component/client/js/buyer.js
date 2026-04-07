@@ -1,419 +1,347 @@
-/* =====================================================
-AGRI CONNECT X BUYER DASHBOARD CONTROLLER
-===================================================== */
-
-/* DOM */
-const menuItems = document.querySelectorAll(".menu li[data-route]");
-const content = document.getElementById("appContent");
-const pageTitle = document.getElementById("pageTitle");
-const cartCount = document.getElementById("cartCount");
-
-/* Charts */
-let orderChart;
-let spendingChart;
-
-/* =====================================================
-API CONFIG
-===================================================== */
+// ==================== AGRI CONNECT X - PROFESSIONAL BUYER DASHBOARD ====================
 
 const API_BASE = (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost")
-  ? "http://localhost:5500"
-  : "https://agriconnectx.onrender.com";
+    ? "http://localhost:5500"
+    : "https://agriconnectx.onrender.com";
 
-/* =====================================================
-API HELPERS
-===================================================== */
+let currentUser = null;
+let cart = [];                    // Local cart for better UX (can sync with backend later)
 
-async function apiGet(url) {
-  const token = localStorage.getItem("token");
-
-  const res = await fetch(API_BASE + url, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    cache: "no-store",
-  });
-
-  if (!res.ok) throw new Error("API error");
-
-  return res.json();
-}
-
-async function apiPost(url, data) {
-  const token = localStorage.getItem("token");
-
-  const res = await fetch(API_BASE + url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(data),
-  });
-
-  return res.json();
-}
-
-async function apiDelete(url) {
-  const token = localStorage.getItem("token");
-
-  const res = await fetch(API_BASE + url, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  return res.json();
-}
-
-/* =====================================================
-ROUTER
-===================================================== */
-
-menuItems.forEach((item) => {
-  item.addEventListener("click", () => {
-    document.querySelector(".menu li.active")?.classList.remove("active");
-    item.classList.add("active");
-
-    const route = item.dataset.route;
-    pageTitle.textContent = item.textContent.trim();
-
-    loadPage(route);
-  });
-});
-
-async function loadPage(route) {
-  try {
-    switch (route) {
-      case "overview":
-        await loadOverview();
-        break;
-
-      case "products":
-        await loadProducts();
-        break;
-
-      case "orders":
-        await loadOrders();
-        break;
-
-      case "tracking":
-        await loadTracking();
-        break;
-
-      case "wishlist":
-        await loadWishlist();
-        break;
-
-      case "messages":
-        await loadNotifications();
-        break;
-
-      case "wallet":
-        loadWallet();
-        break;
-
-      case "profile":
-        loadProfile();
-        break;
+// ====================== API HELPERS ======================
+async function apiRequest(method, url, body = null) {
+    const token = localStorage.getItem("token");
+    if (!token) {
+        location.href = '/component/auth.html';
+        return;
     }
-  } catch (err) {
-    content.innerHTML = `<p>⚠️ Failed to load page</p>`;
-    console.error(err);
-  }
+
+    const options = {
+        method: method,
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+        },
+        credentials: "include"
+    };
+
+    if (body) options.body = JSON.stringify(body);
+
+    const res = await fetch(API_BASE + url, options);
+
+    if (!res.ok) {
+        if (res.status === 401) {
+            localStorage.removeItem("token");
+            location.href = '/component/auth.html';
+        }
+        throw new Error(`API Error: ${res.status}`);
+    }
+    return res.json();
 }
 
-/* =====================================================
-PRODUCTS
-===================================================== */
+async function apiGet(url) { return apiRequest("GET", url); }
+async function apiPost(url, body) { return apiRequest("POST", url, body); }
 
-async function loadProducts() {
-  const res = await apiGet("/api/products");
-
-  if (!res.success) return;
-
-  const products = res.data;
-
-  let html = `
-  <div class="products-grid">
-  `;
-
-  products.forEach((p) => {
-    html += `
-    <div class="product-card">
-
-      <img src="${p.images?.[0]?.url || "https://picsum.photos/300"}">
-
-      <h3>${p.title}</h3>
-
-      <p>${p.description}</p>
-
-      <p>Stock: ${p.quantity}</p>
-
-      <h4>${p.price} FCFA</h4>
-
-      <button class="btn-cart" data-id="${p._id}">
-      Add To Cart
-      </button>
-
-      <button class="btn-wishlist" data-id="${p._id}">
-      Wishlist
-      </button>
-
-    </div>
-    `;
-  });
-
-  html += `</div>`;
-
-  content.innerHTML = html;
+// ====================== LOAD CURRENT USER ======================
+async function loadCurrentUser() {
+    try {
+        const res = await apiGet("/api/me");
+        currentUser = res.data || res;
+        document.getElementById("buyerName").textContent = currentUser.name || "Buyer";
+    } catch (err) {
+        console.error("Failed to load user", err);
+        location.href = '/component/auth.html';
+    }
 }
 
-/* =====================================================
-CART
-===================================================== */
+// ====================== NAVIGATION ======================
+function setupNavigation() {
+    const navLinks = document.querySelectorAll('.nav-link');
 
-async function addToCart(productId) {
-  const res = await apiPost("/api/cart", { productId, quantity: 1 });
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            navLinks.forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
 
-  if (res.success) {
+            const route = link.dataset.route;
+            document.getElementById("pageTitle").textContent = link.textContent.trim();
+            loadPage(route);
+        });
+    });
+
+    // Live search
+    const searchInput = document.getElementById("searchInput");
+    searchInput.addEventListener("input", debounce((e) => {
+        if (document.querySelector('.nav-link.active').dataset.route === "marketplace") {
+            loadMarketplace(e.target.value);
+        }
+    }, 300));
+}
+
+// Simple debounce helper
+function debounce(func, delay) {
+    let timeout;
+    return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func(...args), delay);
+    };
+}
+
+// ====================== MAIN PAGE LOADER ======================
+async function loadPage(route) {
+    const content = document.getElementById("appContent");
+    content.innerHTML = `<div class="loading"><i class="fas fa-spinner fa-spin"></i><p>Loading ${route}...</p></div>`;
+
+    switch (route) {
+
+        case "marketplace":
+            content.innerHTML = `
+                <div class="filters">
+                    <select id="categoryFilter" onchange="loadMarketplace(document.getElementById('searchInput').value)">
+                        <option value="">All Categories</option>
+                        <option value="grains">Grains & Cereals</option>
+                        <option value="tubers">Tubers (Cassava, Yam)</option>
+                        <option value="vegetables">Vegetables</option>
+                        <option value="fruits">Fruits</option>
+                        <option value="legumes">Legumes & Beans</option>
+                    </select>
+                </div>
+                <div id="productGrid" class="product-grid"></div>
+            `;
+            loadMarketplace();
+            break;
+
+        case "orders":
+            content.innerHTML = `
+                <h2>My Orders</h2>
+                <table class="table">
+                    <thead>
+                        <tr><th>Order ID</th><th>Farmer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th></tr>
+                    </thead>
+                    <tbody id="ordersTable"></tbody>
+                </table>
+            `;
+            loadBuyerOrders();
+            break;
+
+        case "wishlist":
+            content.innerHTML = `
+                <h2>My Wishlist</h2>
+                <div id="wishlistGrid" class="product-grid"></div>
+            `;
+            loadWishlist();
+            break;
+
+        case "messages":
+            content.innerHTML = `
+                <div class="card">
+                    <h3>Messages from Farmers</h3>
+                    <p>No new messages at the moment.</p>
+                </div>
+            `;
+            break;
+
+        case "profile":
+            content.innerHTML = `
+                <div class="card">
+                    <h3>Buyer Profile</h3>
+                    <input type="text" id="buyerFullName" placeholder="Full Name" value="${currentUser?.name || ''}">
+                    <input type="text" id="buyerLocation" placeholder="Delivery Location" value="${currentUser?.location || ''}">
+                    <input type="tel" placeholder="Phone Number">
+                    <button class="btn-primary" onclick="saveBuyerProfile()">Save Changes</button>
+                </div>
+            `;
+            break;
+
+        default:
+            content.innerHTML = `<div class="card"><h3>Feature coming soon...</h3></div>`;
+    }
+}
+
+// ====================== MARKETPLACE ======================
+async function loadMarketplace(searchTerm = "") {
+    try {
+        const res = await apiGet("/api/products");
+        let products = res.data || [];
+
+        if (searchTerm) {
+            products = products.filter(p => 
+                p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                p.description?.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        }
+
+        const grid = document.getElementById("productGrid");
+        if (!grid) return;
+
+        grid.innerHTML = products.map(p => `
+            <div class="product-card">
+                <div class="product-image">
+                    <img src="${p.images?.[0]?.url || p.image || 'https://picsum.photos/300/200?random=' + p._id}" 
+                         alt="${p.name || p.title}">
+                </div>
+                <h4>${p.name || p.title}</h4>
+                <p class="price">${p.price} FCFA</p>
+                <p class="stock">${p.quantity} available</p>
+                <div class="product-actions">
+                    <button class="btn-cart" onclick="addToCart('${p._id}', '${p.name || p.title}', ${p.price})">
+                        Add to Cart
+                    </button>
+                    <button class="btn-wishlist" onclick="addToWishlist('${p._id}')">❤️</button>
+                </div>
+            </div>
+        `).join("");
+    } catch (err) {
+        console.error("Failed to load marketplace", err);
+    }
+}
+
+// ====================== CART ======================
+function addToCart(productId, name, price) {
+    const existing = cart.find(item => item.productId === productId);
+    if (existing) {
+        existing.quantity += 1;
+    } else {
+        cart.push({ productId, name, price, quantity: 1 });
+    }
+
     updateCartCount();
-    alert("Added to cart");
-  }
+    // Optional: show toast
+    showToast(`✅ ${name} added to cart`);
 }
 
-async function updateCartCount() {
-  const res = await apiGet("/api/cart");
-
-  if (res.success) {
-    cartCount.textContent = res.data.items.length();
-  }
+function updateCartCount() {
+    const countEl = document.getElementById("cartCount");
+    if (countEl) countEl.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
 }
 
-/* =====================================================
-WISHLIST
-===================================================== */
+function showCart() {
+    if (cart.length === 0) {
+        alert("Your cart is empty!");
+        return;
+    }
 
-async function addWishlist(productId) {
-  const res = await apiPost("/api/wishlist", { productId });
+    let total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    let message = "Your Cart:\n\n";
 
-  if (res.success) {
-    alert("Added to wishlist");
-  }
+    cart.forEach(item => {
+        message += `${item.name} × ${item.quantity} = ${item.price * item.quantity} FCFA\n`;
+    });
+
+    message += `\nTotal: ${total} FCFA\n\nProceed to checkout?`;
+
+    if (confirm(message)) {
+        alert("🎉 Order placed successfully! (Full checkout coming soon)");
+        cart = [];
+        updateCartCount();
+    }
+}
+
+// Make showCart available globally for onclick in HTML
+window.showCart = showCart;
+
+// ====================== WISHLIST ======================
+async function addToWishlist(productId) {
+    try {
+        await apiPost("/api/wishlist", { productId });
+        showToast("❤️ Added to wishlist");
+    } catch (err) {
+        alert("Failed to add to wishlist");
+    }
 }
 
 async function loadWishlist() {
-  const res = await apiGet("/api/wishlist");
+    try {
+        const res = await apiGet("/api/wishlist");
+        const grid = document.getElementById("wishlistGrid");
 
-  if (!res.success) return;
+        if (!res.data || res.data.length === 0) {
+            grid.innerHTML = "<p>Your wishlist is empty.</p>";
+            return;
+        }
 
-  let html = `<h2>Wishlist</h2><div class="products-grid">`;
+        grid.innerHTML = res.data.map(p => `
+            <div class="product-card">
+                <img src="${p.images?.[0]?.url || 'https://picsum.photos/300'}">
+                <h4>${p.name || p.title}</h4>
+                <p>${p.price} FCFA</p>
+            </div>
+        `).join("");
+    } catch (err) {
+        console.error(err);
+    }
+}
 
-  res.data.forEach((p) => {
-    html += `
-      <div class="product-card">
-        <img src="${p.images?.[0]?.url}">
-        <h3>${p.title}</h3>
-        <h4>${p.price} FCFA</h4>
-      </div>
+// ====================== ORDERS ======================
+async function loadBuyerOrders() {
+    try {
+        const res = await apiGet("/api/orders");   // or /api/order depending on your backend
+        const tbody = document.getElementById("ordersTable");
+
+        if (!res.data || res.data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6">No orders yet.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = res.data.map(o => `
+            <tr>
+                <td>#${o._id.slice(-8)}</td>
+                <td>${o.seller?.name || "Local Farmer"}</td>
+                <td>${o.items ? o.items.map(i => i.name).join(", ") : "Products"}</td>
+                <td>${o.total || o.amount} FCFA</td>
+                <td><span class="status ${o.status?.toLowerCase() || 'pending'}">${o.status || "Pending"}</span></td>
+                <td>${new Date(o.createdAt || Date.now()).toLocaleDateString()}</td>
+            </tr>
+        `).join("");
+    } catch (err) {
+        console.error("Failed to load orders", err);
+    }
+}
+
+// ====================== PROFILE ======================
+function saveBuyerProfile() {
+    const name = document.getElementById("buyerFullName").value;
+    const location = document.getElementById("buyerLocation").value;
+
+    alert(`✅ Profile updated!\nName: ${name}\nLocation: ${location}`);
+    // Later: send to backend with apiPut("/api/profile", { name, location })
+}
+
+// ====================== UTILITIES ======================
+function showToast(message) {
+    const toast = document.createElement("div");
+    toast.style.cssText = `
+        position: fixed; bottom: 20px; right: 20px; background: #16a34a; color: white;
+        padding: 12px 20px; border-radius: 8px; z-index: 10000; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     `;
-  });
+    toast.textContent = message;
+    document.body.appendChild(toast);
 
-  html += "</div>";
-
-  content.innerHTML = html;
+    setTimeout(() => toast.remove(), 3000);
 }
 
-/* =====================================================
-ORDERS
-===================================================== */
-
-async function loadOrders() {
-  const res = await apiGet("/api/orders");
-
-  if (!res.success) return;
-
-  let html = `
-  <table class="table">
-
-  <thead>
-  <tr>
-  <th>ID</th>
-  <th>Status</th>
-  <th>Total</th>
-  </tr>
-  </thead>
-
-  <tbody>
-  `;
-
-  res.data.forEach((o) => {
-    html += `
-      <tr>
-        <td>${o._id}</td>
-        <td>${o.status}</td>
-        <td>${o.total} FCFA</td>
-      </tr>
-    `;
-  });
-
-  html += "</tbody></table>";
-
-  content.innerHTML = html;
-}
-
-/* =====================================================
-TRACKING
-===================================================== */
-
-async function loadTracking() {
-  const res = await apiGet("/api/orders");
-
-  if (!res.success) return;
-
-  let html = `<h3>Shipment Tracking</h3>`;
-
-  res.data.forEach((o) => {
-    html += `
-    <p>
-    Order ${o._id} → ${o.status}
-    </p>
-    `;
-  });
-
-  content.innerHTML = html;
-}
-
-/* =====================================================
-NOTIFICATIONS
-===================================================== */
-
-async function loadNotifications() {
-  const res = await apiGet("/api/notifications");
-
-  if (!res.success) return;
-
-  let html = `<h3>Notifications</h3>`;
-
-  res.data.forEach((n) => {
-    html += `
-    <div class="card">
-    ${n.message}
-    </div>
-    `;
-  });
-
-  content.innerHTML = html;
-}
-
-/* =====================================================
-OVERVIEW DASHBOARD
-===================================================== */
-
-async function loadOverview() {
-  const res = await apiGet("/api/orders");
-
-  if (!res.success) return;
-
-  const orders = res.data;
-
-  content.innerHTML = `
-  <div class="card">
-  <h3>Total Orders</h3>
-  <p>${orders.length}</p>
-  </div>
-
-  <div class="card">
-  <canvas id="buyerOrderChart"></canvas>
-  </div>
-  `;
-
-  const ctx = document.getElementById("buyerOrderChart");
-
-  if (orderChart) orderChart.destroy();
-
-  orderChart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: ["Jan","Feb","Mar","Apr","May"],
-      datasets: [
-        {
-          label: "Orders",
-          data: [2,5,3,6,4],
-          borderColor: "#2563eb",
-        },
-      ],
-    },
-  });
-}
-
-/* =====================================================
-PROFILE
-===================================================== */
-
-function loadProfile() {
-  content.innerHTML = `
-  <div class="card">
-
-  <h3>Profile</h3>
-
-  <input placeholder="Company name">
-
-  <input placeholder="Location">
-
-  <button class="btn-primary">Save</button>
-
-  </div>
-  `;
-}
-
-/* =====================================================
-WALLET
-===================================================== */
-
-function loadWallet() {
-  content.innerHTML = `
-  <div class="card">
-
-  <h3>Wallet</h3>
-
-  <p>Balance: 0 FCFA</p>
-
-  <button>Top Up</button>
-
-  </div>
-  `;
-}
-
-/* =====================================================
-EVENT DELEGATION
-===================================================== */
-
-document.addEventListener("click", (e) => {
-  if (e.target.classList.contains("btn-cart")) {
-    addToCart(e.target.dataset.id);
-  }
-
-  if (e.target.classList.contains("btn-wishlist")) {
-    addWishlist(e.target.dataset.id);
-  }
+// ====================== LOGOUT ======================
+document.getElementById("logoutBtn").addEventListener("click", () => {
+    localStorage.removeItem("token");
+    location.href = "/component/auth.html";
 });
 
-/* =====================================================
-LOGOUT
-===================================================== */
+// ====================== INITIALIZATION ======================
+async function initBuyerDashboard() {
+    await loadCurrentUser();
+    setupNavigation();
+    updateCartCount();
 
-document.getElementById("logoutBtn").onclick = () => {
-  localStorage.removeItem("token");
-  location.href = "/component/auth.html";
-  alert("logout successful");
-};
+    // Start on Marketplace (as per your HTML default)
+    document.querySelector('[data-route="marketplace"]').classList.add("active");
+    loadPage("marketplace");
+}
 
-/* =====================================================
-INIT
-===================================================== */
+initBuyerDashboard();
 
-updateCartCount();
-
-loadPage("products");
+// Make some functions globally available for inline onclick
+window.addToCart = addToCart;
+window.addToWishlist = addToWishlist;
+window.showCart = showCart;
+window.loadMarketplace = loadMarketplace;
+window.saveBuyerProfile = saveBuyerProfile;

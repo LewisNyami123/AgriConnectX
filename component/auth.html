@@ -3,79 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgriConnectX</title>
+    <title>AgriConnectX - Welcome</title>
     <link rel="stylesheet" href="style/auth.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="authModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
+            
             <div class="auth-container">
                 <div class="auth-forms">
+
                     <!-- Login Form -->
                     <form id="loginForm" class="auth-form active">
-                        <h3>Login to Your Account</h3>
+                        <h3>Welcome Back</h3>
                         <div class="form-group">
-                            <input type="email" id="loginEmail" placeholder="Email" required>
+                            <input type="email" id="loginEmail" placeholder="Email Address" required>
                         </div>
                         <div class="form-group">
                             <input type="password" id="loginPassword" placeholder="Password" required>
                         </div>
                         <button type="submit" class="btn btn-primary">Login</button>
-                        <p class="switch-form">Don't have an account? <a href="#" id="showRegister">Register</a></p>
-                         <hr>
-                            <p class="or">OR</p>
-                            <button type="button" class="btn btn-secondary google-btn">
-                                <i class="fab fa-google "></i> Sign in with Google
-                           
-                            </button>
+
+                        <p class="switch-form">
+                            Don't have an account? 
+                            <a href="#" id="showRegister">Register here</a>
+                        </p>
+
+                        <div class="divider">
+                            <span>OR</span>
+                        </div>
+
+                        <button type="button" id="googleLoginBtn" class="btn btn-google">
+                            <i class="fab fa-google"></i> Continue with Google
+                        </button>
                     </form>
 
                     <!-- Register Form -->
                     <form id="registerForm" class="auth-form">
-    <h3>Create an Account</h3>
-    <div class="form-row">
-        <div class="form-group half">
-            <input type="text" id="firstName" placeholder="First Name" autocomplete="given-name" required>
-        </div>
-        <div class="form-group half">
-            <input type="text" id="lastName" placeholder="Last Name" autocomplete="family-name" required>
-        </div>
-    </div>
-    <div class="form-group">
-        <input type="email" id="registerEmail" placeholder="Email" autocomplete="email" required>
-    </div>
-    <div class="form-group">
-        <input type="tel" id="phone" placeholder="Phone Number" autocomplete="tel" required>
-    </div>
-    <div class="form-group">
-        <input type="password" id="registerPassword" placeholder="Password" autocomplete="new-password" required>
-    </div>
-    <div class="form-group">
-        <select id="role" required>
-            <option value="">Select Role</option>
-            <option value="farmer">Farmer</option>
-            <option value="buyer">Buyer</option>
-        </select>
-    </div>
-    <div id="farmerFields" style="display: none;">
-        <div class="form-group">
-            <input type="text" id="farmName" placeholder="Farm Name" autocomplete="organization-title">
-        </div>
-        <div class="form-group">
-            <input type="text" id="farmLocation" placeholder="Farm Location" autocomplete="address-line1">
-        </div>
-    </div>
-    <button type="submit" class="btn btn-primary">Register</button>
-    <p class="switch-form">Already have an account? <a href="#" id="showLogin">Login</a></p>
-</form>
+                        <h3>Create Your Account</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group half">
+                                <input type="text" id="firstName" placeholder="First Name" required>
+                            </div>
+                            <div class="form-group half">
+                                <input type="text" id="lastName" placeholder="Last Name" required>
+                            </div>
+                        </div>
 
+                        <div class="form-group">
+                            <input type="email" id="registerEmail" placeholder="Email Address" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="tel" id="phone" placeholder="Phone Number" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" id="registerPassword" placeholder="Create Password" required>
+                        </div>
+
+                        <div class="form-group">
+                            <select id="role" required>
+                                <option value="">Select your role</option>
+                                <option value="farmer">I am a Farmer</option>
+                                <option value="buyer">I am a Buyer</option>
+                            </select>
+                        </div>
+
+                        <div id="farmerFields" style="display: none;">
+                            <div class="form-group">
+                                <input type="text" id="farmName" placeholder="Farm Name">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" id="farmLocation" placeholder="Farm Location (Village / Region)">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Create Account</button>
+
+                        <p class="switch-form">
+                            Already have an account? 
+                            <a href="#" id="showLogin">Login here</a>
+                        </p>
+
+                        <div class="divider">
+                            <span>OR</span>
+                        </div>
+
+                        <button type="button" id="googleRegisterBtn" class="btn btn-google">
+                            <i class="fab fa-google"></i> Sign up with Google
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
+
     <script type="module" src="js/auth.js"></script>
 </body>
 </html>

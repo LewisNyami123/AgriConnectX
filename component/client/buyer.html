@@ -1,94 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Buyer Dashboard | AgriConnectX</title>
-
-<link rel="stylesheet" href="../style/buyer.css">
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buyer Dashboard | AgriConnectX</title>
+    
+    <link rel="stylesheet" href="../style/buyer.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-
 <body>
 
 <!-- NAVBAR -->
-
 <header class="navbar">
+    <div class="nav-left">
+        <h2 class="logo">AgriConnectX</h2>
+        <input type="text" id="searchInput" placeholder="Search fresh produce, maize, cassava..." class="search">
+    </div>
 
-<div class="nav-left">
+    <div class="nav-right">
+        <a href="#" data-route="marketplace" class="nav-link active">
+            <i class="fas fa-store"></i> Marketplace
+        </a>
+        <a href="#" data-route="orders" class="nav-link">
+            <i class="fas fa-shopping-bag"></i> My Orders
+        </a>
+        <a href="#" data-route="wishlist" class="nav-link">
+            <i class="fas fa-heart"></i> Wishlist
+        </a>
+        <a href="#" data-route="messages" class="nav-link">
+            <i class="fas fa-comments"></i> Messages
+        </a>
 
-<h2 class="logo">AgriConnectX</h2>
+        <div class="notifications">
+            <i class="fas fa-bell"></i>
+            <span id="notifCount" class="badge">3</span>
+        </div>
 
-<input type="text" placeholder="Search farm products..." class="search">
+        <div class="cart-icon" onclick="showCart()">
+            <i class="fas fa-shopping-cart"></i>
+            <span id="cartCount">0</span>
+        </div>
 
-</div>
+        <div class="profile">
+            <img src="https://i.pravatar.cc/100" alt="Profile">
+            <span id="buyerName">Buyer</span>
+        </div>
 
-<div class="nav-right">
-
-<a data-route="products">
-<i class="fas fa-store"></i>
-Products
-</a>
-
-<a data-route="orders">
-<i class="fas fa-shopping-bag"></i>
-Orders
-</a>
-
-<a data-route="messages">
-<i class="fas fa-comments"></i>
-Messages
-</a>
-
-<div class="notifications">
-<i class="fas fa-bell"></i>
-<span class="badge">2</span>
-</div>
-
-<div class="cart-icon">
-<i class="fas fa-shopping-cart"></i>
-<span id="cartCount">0</span>
-</div>
-
-<div class="profile">
-<img src="https://i.pravatar.cc/100">
-<span>Buyer</span>
-</div>
-
-<button id="logoutBtn">
-<i class="fas fa-sign-out-alt"></i>
-</button>
-
-</div>
-
+        <button id="logoutBtn">
+            <i class="fas fa-sign-out-alt"></i>
+        </button>
+    </div>
 </header>
 
 <!-- MAIN CONTENT -->
-
 <main>
-
-<h1 id="pageTitle">Browse Products</h1>
-
-<section id="appContent">
-
-<div class="loading">
-<i class="fas fa-spinner fa-spin"></i>
-<p>Loading content...</p>
-</div>
-
-</section>
-
+    <h1 id="pageTitle">Marketplace - Fresh from Local Farmers</h1>
+    <section id="appContent"></section>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script type="module" src="./js/buyer.js"></script>
-
 </body>
 </html>

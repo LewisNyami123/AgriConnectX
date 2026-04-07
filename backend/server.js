@@ -40,15 +40,25 @@ app.use((req, res, next) => {
   next();
 });
 
-//CORS: restrict in production by setting FRONTEND_URL in .env
+// ====================== CORS SETUP ======================
+// Restrict in production by setting FRONTEND_URL in .env
 const corsOptions = {
-  origin: [process.env.FRONTEND_URL, "http://localhost:5500", "http://127.0.0.1:5500"],
+  origin: [
+    process.env.FRONTEND_URL,
+    "http://localhost:5500",
+    "http://127.0.0.1:5500",
+    "https://agri-connect-x.vercel.app",   // add if you use React/Vite sometimes
+  ],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 };
+
+// Apply CORS to all routes
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
+
+// Handle preflight OPTIONS requests properly (Express 5 safe)
+app.options("/*splat", cors(corsOptions));   // <-- This is the fix
 // app.use(cors({
 //   origin: "https://agri-connect-x.vercel.app", // your Vercel domain
 //   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],

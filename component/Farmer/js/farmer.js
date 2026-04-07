@@ -1,206 +1,372 @@
-const menuItems = document.querySelectorAll(".menu li");
-const content = document.getElementById("appContent");
-const pageTitle = document.getElementById("pageTitle");
+// ==================== AGRI CONNECT X - PROFESSIONAL FARMER DASHBOARD ====================
 
-/* API Helper */
-const API_BASE = (window.location.hostname === "127.0.0.1")
-  ? "http://localhost:5500"
-  : "https://agriconnectx.onrender.com";
+const API_BASE = window.location.hostname === "127.0.0.1" 
+    ? "http://localhost:5500" 
+    : "https://agriconnectx.onrender.com";
 
-;
+let currentUser = null;
 
-async function apiGet(url) {
-  const token = localStorage.getItem("token");
-  const res = await fetch(`${API_BASE}${url}`, {
-    headers: { Authorization: `Bearer ${token}` },
-    withCredentials:true
-  });
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
-  return res.json();
+// ====================== API HELPER ======================
+async function apiRequest(method, url, body = null) {
+    const token = localStorage.getItem("token");
+    if (!token) {
+        console.warn("No token found - Redirecting to login");
+        location.href = '/component/auth.html';
+        return null;
+    }
+
+    const res = await fetch(`${API_BASE}${url}`, {
+        method,
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+        },
+        credentials: "include",
+        body: body ? JSON.stringify(body) : null
+    });
+
+    if (!res.ok) {
+        if (res.status === 401) {
+            console.warn("Token expired or invalid");
+            localStorage.removeItem("token");
+            location.href = '/component/auth.html';
+            return null;
+        }
+        throw new Error(`HTTP ${res.status}`);
+    }
+    return res.json();
 }
 
-async function apiPost(url, body) {
-  const token = localStorage.getItem("token");
-  const res = await fetch(`${API_BASE}${url}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify(body),
-    withCredetials:true
-  });
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
-  return res.json();
+async function apiGet(url) { return apiRequest("GET", url); }
+async function apiPost(url, body) { return apiRequest("POST", url, body); }
+
+// ====================== LOAD CURRENT USER ======================
+async function loadCurrentUser() {
+    const token = localStorage.getItem("token");
+    if (!token) {
+        location.href = '/component/auth.html';
+        return null;
+    }
+
+    try {
+        const res = await apiGet("/api/auth/me");     // Note: you used /api/auth/me in your route
+
+        currentUser = res.user || res.data || res;
+
+        if (!currentUser || !currentUser.role) {
+            throw new Error("Invalid user data from /api/me");
+        }
+
+        // Update topbar
+        document.getElementById("farmerName").textContent = 
+            currentUser.name || 
+            `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim() || 
+            currentUser.farmName || "Farmer";
+
+        document.getElementById("farmerLocation").textContent = 
+            currentUser.location || currentUser.farmLocation || "Centre Region, CM";
+
+        console.log("✅ Farmer loaded successfully:", currentUser.role);
+        return currentUser;
+    } catch (err) {
+        console.error("❌ loadCurrentUser failed:", err);
+        
+        if (err.message.includes("401") || String(err).includes("Unauthorized")) {
+            localStorage.removeItem("token");
+            location.href = '/component/auth.html';
+        } else {
+            document.getElementById("appContent").innerHTML = `
+                <div class="card" style="text-align:center; color:orange; padding:30px;">
+                    <h3>Failed to load dashboard</h3>
+                    <p>Could not connect to server. Please try again.</p>
+                    <button onclick="location.reload()">Retry</button>
+                </div>`;
+        }
+        return null;
+    }
 }
 
-/* ROUTER */
-menuItems.forEach(item => {
-  item.addEventListener("click", () => {
-    document.querySelector(".menu li.active")?.classList.remove("active");
-    item.classList.add("active");
-    const route = item.dataset.route;
-    pageTitle.textContent = item.textContent.trim();
-    loadPage(route);
-  });
-});
+// ====================== MENU SETUP ======================
+function setupMenu() {
+    document.querySelectorAll(".menu li").forEach(item => {
+        item.addEventListener("click", () => {
+            document.querySelectorAll(".menu li").forEach(li => li.classList.remove("active"));
+            item.classList.add("active");
+            
+            const route = item.dataset.route;
+            document.getElementById("pageTitle").textContent = item.textContent.trim();
+            loadPage(route);
+        });
+    });
+}
 
-/* PAGE LOADER */
+// ====================== MAIN PAGE LOADER ======================
 async function loadPage(route) {
-  switch(route) {
-    case "overview":
-      content.innerHTML = `
-        <div class="cards">
-          <div class="card"><h3>Total Sales</h3><p id="totalSales">Loading...</p></div>
-          <div class="card"><h3>Active Orders</h3><p id="activeOrders">Loading...</p></div>
-          <div class="card"><h3>Available Stock</h3><p id="availableStock">Loading...</p></div>
-        </div>
-        <div class="card"><h3>Sales Trend</h3><canvas id="farmerSalesChart"></canvas></div>
-        <div class="card"><h3>Product Distribution</h3><canvas id="farmerProductChart"></canvas></div>
-      `;
-      try {
-        const res = await apiGet("/api/products");
-        document.getElementById("availableStock").textContent = `${res.data.length} Products`;
-        // Example: active orders
-        const orders = await apiGet("/api/order");
-        document.getElementById("activeOrders").textContent = orders.data.length;
-        document.getElementById("totalSales").textContent = orders.data.reduce((sum,o)=>sum+o.amount,0) + " FCFA";
+    const content = document.getElementById("appContent");
+    content.innerHTML = `<div class="loading">Loading ${route}...</div>`;
 
-        // Charts
-        setTimeout(() => {
-          new Chart(document.getElementById("farmerSalesChart"), {
-            type: "bar",
-            data: {
-              labels: ["Jan","Feb","Mar","Apr","May","Jun"],
-              datasets: [{ label:"Sales", data:[400000,600000,500000,700000,800000,900000], backgroundColor:"#16a34a" }]
+    if (!currentUser) {
+        content.innerHTML = `<p style="color:red;">Session expired. <a href="/component/auth.html">Login again</a>.</p>`;
+        return;
+    }
+
+    switch (route) {
+
+        case "overview":
+            content.innerHTML = `
+                <div class="cards grid-4">
+                    <div class="card"><h3>Total Sales</h3><p id="totalSales" class="big">0 FCFA</p></div>
+                    <div class="card"><h3>Active Orders</h3><p id="activeOrders" class="big">0</p></div>
+                    <div class="card"><h3>Available Stock</h3><p id="stockCount" class="big">0</p></div>
+                    <div class="card"><h3>Pending Payment</h3><p id="pendingPayment" class="big">0 FCFA</p></div>
+                </div>
+                <div class="row">
+                    <div class="card half"><h3>Sales Trend (Last 6 Months)</h3><canvas id="salesChart"></canvas></div>
+                    <div class="card half"><h3>Top Products</h3><canvas id="productChart"></canvas></div>
+                </div>
+                <div class="card">
+                    <h3>Recent Orders</h3>
+                    <table class="table"><tbody id="recentOrders"></tbody></table>
+                </div>
+            `;
+
+            try {
+                const [productsRes, ordersRes] = await Promise.all([
+                    apiGet("/api/products"),
+                    apiGet("/api/order")
+                ]);
+
+                document.getElementById("stockCount").textContent = productsRes.data?.length || 0;
+                document.getElementById("activeOrders").textContent = 
+                    (ordersRes.data || []).filter(o => o.status !== "Delivered").length;
+                document.getElementById("totalSales").textContent = 
+                    (ordersRes.data || []).reduce((sum, o) => sum + (o.amount || 0), 0) + " FCFA";
+
+                // Sales Trend Chart
+                new Chart(document.getElementById("salesChart"), {
+                    type: "line",
+                    data: {
+                        labels: ["Jan","Feb","Mar","Apr","May","Jun"],
+                        datasets: [{ 
+                            label: "Sales (FCFA)", 
+                            data: [320000,480000,650000,520000,890000,1250000], 
+                            borderColor: "#16a34a", 
+                            tension: 0.4 
+                        }]
+                    }
+                });
+
+                // Product Distribution Chart
+                new Chart(document.getElementById("productChart"), {
+                    type: "doughnut",
+                    data: {
+                        labels: (productsRes.data || []).slice(0,5).map(p => p.name),
+                        datasets: [{ 
+                            data: (productsRes.data || []).slice(0,5).map(p => p.quantity), 
+                            backgroundColor: ["#15803d","#4ade80","#eab308","#f97316","#ef4444"] 
+                        }]
+                    }
+                });
+
+                // Recent Orders
+                document.getElementById("recentOrders").innerHTML = 
+                    (ordersRes.data || []).slice(0,5).map(o => `
+                        <tr>
+                            <td>#${o._id?.slice(-6) || 'N/A'}</td>
+                            <td>${o.buyer?.name || "Customer"}</td>
+                            <td>${o.status || "Pending"}</td>
+                            <td>${o.amount || 0} FCFA</td>
+                        </tr>
+                    `).join("");
+            } catch (err) {
+                console.error(err);
+                content.innerHTML += `<p style="color:orange;">Some data could not be loaded</p>`;
             }
-          });
-          new Chart(document.getElementById("farmerProductChart"), {
-            type: "pie",
-            data: {
-              labels: res.data.map(p=>p.name),
-              datasets: [{ data: res.data.map(p=>p.quantity), backgroundColor:["#15803d","#65a30d","#ca8a04","#2563eb","#dc2626"] }]
-            }
-          });
-        },100);
-      } catch(err) {
-        content.innerHTML += `<p style="color:red;">Error loading overview: ${err.message}</p>`;
-      }
-    break;
+            break;
 
-    case "inventory":
-      content.innerHTML = `
-        <button class="btn btn-primary" onclick="showAddProductForm()">+ Add Product</button>
-        <div id="addProductForm" style="display:none;" class="card">
-          <h3>Add New Product</h3>
-          <input type="text" id="productName" placeholder="Product Name">
-          <input type="number" id="productQty" placeholder="Quantity">
-          <input type="number" id="productPrice" placeholder="Price">
-          <button class="btn btn-primary" onclick="addProduct()">Save</button>
-        </div>
-        <table class="table">
-          <thead><tr><th>Product</th><th>Quantity</th><th>Price</th><th>Status</th></tr></thead>
-          <tbody id="inventoryTable"></tbody>
-        </table>
-      `;
-      loadInventory();
-    break;
+        case "inventory":
+            content.innerHTML = `
+                <div class="action-bar">
+                    <button class="btn btn-primary" onclick="showAddProductForm()">+ Add New Product</button>
+                </div>
+                <div id="addProductForm" class="card" style="display:none;">
+                    <h3>Add New Product</h3>
+                    <input type="text" id="productName" placeholder="Product Name (e.g. Yellow Maize)">
+                    <input type="number" id="productQty" placeholder="Quantity (in Kg or Bags)">
+                    <input type="number" id="productPrice" placeholder="Price per unit (FCFA)">
+                    <button class="btn btn-primary" onclick="addProduct()">Save Product</button>
+                </div>
 
-    case "orders":
-      content.innerHTML = `
-        <table class="table">
-          <thead><tr><th>Order ID</th><th>Buyer</th><th>Status</th><th>Amount</th></tr></thead>
-          <tbody id="ordersTable"></tbody>
-        </table>
-      `;
-      loadOrders();
-    break;
+                <table class="table">
+                    <thead><tr><th>Product</th><th>Quantity</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody id="inventoryTable"></tbody>
+                </table>
+            `;
+            loadInventory();
+            break;
 
-    case "wallet":
-      content.innerHTML = `
-        <div class="card">
-          <h3>Available Balance</h3>
-          <p id="walletBalance">Loading...</p>
-          <button class="btn btn-primary">Withdraw</button>
-        </div>
-      `;
-      // Placeholder until backend wallet route exists
-      document.getElementById("walletBalance").textContent = "0 FCFA";
-    break;
+        case "orders":
+            content.innerHTML = `
+                <h2>Incoming Orders</h2>
+                <table class="table">
+                    <thead><tr><th>Order ID</th><th>Buyer</th><th>Product</th><th>Qty</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+                    <tbody id="ordersTable"></tbody>
+                </table>
+            `;
+            loadOrders();
+            break;
 
-    case "profile":
-      content.innerHTML = `
-        <div class="card">
-          <h3>Profile Settings</h3>
-          <input type="text" placeholder="Farm Name">
-          <input type="text" placeholder="Location">
-          <button class="btn btn-primary">Save</button>
-        </div>
-      `;
-    break;
-  }
+        case "wallet":
+            content.innerHTML = `
+                <div class="card">
+                    <h3>Available Balance</h3>
+                    <p id="balance" class="balance-amount">248,750 FCFA</p>
+                    <button class="btn btn-success" onclick="initiateWithdraw()">Withdraw to Mobile Money</button>
+                </div>
+                <div class="card">
+                    <h3>Recent Transactions</h3>
+                    <table class="table"><tbody id="transactionTable"></tbody></table>
+                </div>
+            `;
+            break;
+
+        case "analytics":
+            content.innerHTML = `<div class="card"><h3>Sales Analytics</h3><canvas id="analyticsChart" height="120"></canvas></div>`;
+            setTimeout(() => {
+                new Chart(document.getElementById("analyticsChart"), {
+                    type: "bar",
+                    data: {
+                        labels: ["Maize","Cassava","Beans","Groundnut","Plantain"],
+                        datasets: [{ label: "Revenue", data: [450000,320000,180000,250000,210000], backgroundColor: "#16a34a" }]
+                    }
+                });
+            }, 300);
+            break;
+
+        case "advisory":
+            content.innerHTML = `
+                <div class="card">
+                    <h3>Weather & Crop Advisory - Centre Region</h3>
+                    <p><strong>Today:</strong> 28°C • Light Rain • Good for planting maize</p>
+                    <p><strong>Tip:</strong> Apply fertilizer on your cassava field this week.</p>
+                </div>
+            `;
+            break;
+
+        case "messages":
+            content.innerHTML = `<div class="card"><h3>Messages from Buyers</h3><p>No new messages yet.</p></div>`;
+            break;
+
+        case "profile":
+            content.innerHTML = `
+                <div class="card">
+                    <h3>Farm Profile</h3>
+                    <input type="text" id="farmName" placeholder="Farm Name" value="${currentUser?.farmName || ''}">
+                    <input type="text" id="location" placeholder="Location" value="${currentUser?.location || ''}">
+                    <button class="btn btn-primary" onclick="saveProfile()">Update Profile</button>
+                </div>
+            `;
+            break;
+
+        default:
+            content.innerHTML = `<div class="card"><h3>Page Under Construction</h3></div>`;
+    }
 }
 
-/* Inventory Functions */
+// ====================== INVENTORY FUNCTIONS ======================
+async function loadInventory() {
+    try {
+        const res = await apiGet("/api/products");
+        const tbody = document.getElementById("inventoryTable");
+        tbody.innerHTML = (res.data || []).map(p => `
+            <tr>
+                <td>${p.name}</td>
+                <td>${p.quantity}</td>
+                <td>${p.price} FCFA</td>
+                <td><span class="status available">Available</span></td>
+                <td>
+                    <button onclick="editProduct('${p._id}')">Edit</button>
+                    <button onclick="deleteProduct('${p._id}')">Delete</button>
+                </td>
+            </tr>
+        `).join("");
+    } catch (err) {
+        console.error("Failed to load inventory:", err);
+    }
+}
+
 function showAddProductForm() {
-  document.getElementById("addProductForm").style.display = "block";
+    document.getElementById("addProductForm").style.display = "block";
 }
 
 async function addProduct() {
-  const name = document.getElementById("productName").value;
-  const quantity = document.getElementById("productQty").value;
-  const price = document.getElementById("productPrice").value;
-  try {
-    const res = await apiPost("/api/products", { name, quantity, price });
-    if (res.success) {
-      alert("Product added successfully!");
-      loadInventory();
+    const name = document.getElementById("productName").value.trim();
+    const quantity = document.getElementById("productQty").value;
+    const price = document.getElementById("productPrice").value;
+
+    if (!name || !quantity || !price) {
+        alert("Please fill all fields!");
+        return;
     }
-  } catch(err) {
-    alert("Error: " + err.message);
-  }
+
+    try {
+        await apiPost("/api/products", { 
+            name, 
+            quantity: Number(quantity), 
+            price: Number(price) 
+        });
+        alert("✅ Product added successfully!");
+        loadInventory();
+        document.getElementById("addProductForm").style.display = "none";
+    } catch (err) {
+        alert("Error adding product: " + err.message);
+    }
 }
 
-async function loadInventory() {
-  try {
-    const res = await apiGet("/api/products");
-    const tbody = document.getElementById("inventoryTable");
-    tbody.innerHTML = res.data.map(p => `
-      <tr>
-        <td>${p.name}</td>
-        <td>${p.quantity}</td>
-        <td>${p.price} FCFA</td>
-        <td>${p.status || "Available"}</td>
-      </tr>
-    `).join("");
-  } catch(err) {
-    content.innerHTML += `<p style="color:red;">Error loading inventory: ${err.message}</p>`;
-  }
-}
-
-/* Orders Functions */
+// ====================== ORDERS ======================
 async function loadOrders() {
-  try {
-    const res = await apiGet("/api/order");
-    const tbody = document.getElementById("ordersTable");
-    tbody.innerHTML = res.data.map(o => `
-      <tr>
-        <td>${o._id}</td>
-        <td>${o.buyer?.name || "Unknown"}</td>
-        <td>${o.status}</td>
-        <td>${o.amount} FCFA</td>
-      </tr>
-    `).join("");
-  } catch(err) {
-    content.innerHTML += `<p style="color:red;">Error loading orders: ${err.message}</p>`;
-  }
+    try {
+        const res = await apiGet("/api/order");
+        const tbody = document.getElementById("ordersTable");
+        tbody.innerHTML = (res.data || []).map(o => `
+            <tr>
+                <td>#${o._id?.slice(-6) || 'N/A'}</td>
+                <td>${o.buyer?.name || "Unknown"}</td>
+                <td>${o.items?.[0]?.name || "Product"}</td>
+                <td>${o.quantity || 1}</td>
+                <td>${o.amount} FCFA</td>
+                <td><span class="status ${o.status?.toLowerCase() || 'pending'}">${o.status || "Pending"}</span></td>
+                <td><button onclick="updateOrderStatus('${o._id}')">Update Status</button></td>
+            </tr>
+        `).join("");
+    } catch (err) {
+        console.error(err);
+    }
 }
 
-/* Logout */
+// Placeholder functions
+function editProduct(id) { alert(`Edit product ${id} - Coming soon`); }
+function deleteProduct(id) { if(confirm("Delete this product?")) alert(`Product ${id} deleted`); }
+function updateOrderStatus(id) { alert(`Update status for order ${id}`); }
+function saveProfile() { alert("✅ Farm profile updated!"); }
+function initiateWithdraw() { alert("Withdrawal request initiated."); }
+
+// ====================== LOGOUT ======================
 document.getElementById("logoutBtn").addEventListener("click", () => {
-  localStorage.removeItem("token");
-  location.href = '/component/auth.html';
+    localStorage.removeItem("token");
+    location.href = '/component/auth.html';
+    alert("✅ Logged out successfully");
 });
 
-/* Default Load */
-loadPage("overview");
+// ====================== INITIALIZE ======================
+async function initFarmerDashboard() {
+    console.log("🚀 Initializing Farmer Dashboard...");
+    
+    const user = await loadCurrentUser();
+    if (!user) return;
+
+    setupMenu();
+    loadPage("overview");
+}
+
+initFarmerDashboard();
