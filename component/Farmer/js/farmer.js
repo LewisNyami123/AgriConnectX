@@ -184,7 +184,89 @@ async function loadPage(route) {
             }
             break;
 
-       case "inventory":
+      case "inventory":
+    content.innerHTML = `
+        <div class="action-bar">
+            <button class="btn btn-primary" onclick="showAddProductForm()">+ Add New Produce</button>
+        </div>
+        
+        <!-- Clean Add Product Form -->
+        <div id="addProductForm" class="add-product-form" style="display:none;">
+            <h3>Add New Farm Produce</h3>
+            
+            <div class="form-group">
+                <label>Product Title <span class="required">*</span></label>
+                <input type="text" id="productTitle" placeholder="e.g. Yellow Maize, Fresh Tomatoes" required>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Quantity <span class="required">*</span></label>
+                    <input type="number" id="productQty" placeholder="100" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label>Unit</label>
+                    <select id="productUnit">
+                        <option value="kg">Kilograms (kg)</option>
+                        <option value="bag">Bags</option>
+                        <option value="piece">Pieces</option>
+                        <option value="crate">Crates</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Price per unit (FCFA) <span class="required">*</span></label>
+                <input type="number" id="productPrice" placeholder="450" min="1" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Category</label>
+                <select id="productCategory">
+                    <option value="grains">Grains & Cereals</option>
+                    <option value="tubers">Tubers (Cassava, Yam)</option>
+                    <option value="vegetables">Vegetables</option>
+                    <option value="fruits">Fruits</option>
+                    <option value="legumes">Legumes & Beans</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="productDescription" rows="3" placeholder="Short description of the produce (optional)"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Upload Image (optional)</label>
+                <input type="file" id="productImage" accept="image/*">
+                <small>Recommended: Clear photo of the produce (JPG/PNG, max 5MB)</small>
+            </div>
+            
+            <div class="form-actions">
+                <button class="btn btn-primary" onclick="addProduct()">Save Product</button>
+                <button class="btn btn-secondary" onclick="hideAddProductForm()">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Inventory Table -->
+        <div class="inventory-section">
+            <h3>My Farm Produce</h3>
+            <table class="table" id="inventoryTable">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    `;
+    loadInventory();
+    break;
     content.innerHTML = `
         <div class="action-bar">
             <button class="btn btn-primary" onclick="showAddProductForm()">+ Add New Product</button>
