@@ -195,6 +195,73 @@ async function loadPage(route) {
             
             <div class="form-group">
                 <label>Product Title *</label>
+                <input type="text" id="productTitle" placeholder="e.g. Yellow Maize, Fresh Tomatoes" required>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group half">
+                    <label>Quantity *</label>
+                    <input type="number" id="productQty" placeholder="100" min="1" required>
+                </div>
+                <div class="form-group half">
+                    <label>Unit</label>
+                    <select id="productUnit">
+                        <option value="kg">kg</option>
+                        <option value="bag">bag</option>
+                        <option value="piece">piece</option>
+                        <option value="crate">crate</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Price per unit (FCFA) *</label>
+                <input type="number" id="productPrice" placeholder="450" min="1" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Category</label>
+                <select id="productCategory">
+                    <option value="grains">Grains & Cereals</option>
+                    <option value="tubers">Tubers</option>
+                    <option value="vegetables">Vegetables</option>
+                    <option value="fruits">Fruits</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="productDescription" rows="3" placeholder="Brief description..."></textarea>
+            </div>
+            
+            <!-- Image Upload -->
+            <div class="form-group">
+                <label>Upload Product Image</label>
+                <input type="file" id="productImage" accept="image/*">
+                <small style="display:block; margin-top:5px; color:#666;">Recommended: JPG or PNG, max 5MB</small>
+            </div>
+            
+            <button class="btn btn-primary" onclick="addProduct()">Save Product</button>
+            <button class="btn" onclick="hideAddProductForm()">Cancel</button>
+        </div>
+
+        <table class="table">
+            <thead><tr><th>Product</th><th>Quantity</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="inventoryTable"></tbody>
+        </table>
+    `;
+    loadInventory();
+    break;
+    content.innerHTML = `
+        <div class="action-bar">
+            <button class="btn btn-primary" onclick="showAddProductForm()">+ Add New Product</button>
+        </div>
+        
+        <div id="addProductForm" class="card" style="display:none;">
+            <h3>Add New Farm Produce</h3>
+            
+            <div class="form-group">
+                <label>Product Title *</label>
                 <input type="text" id="productTitle" placeholder="e.g. Yellow Maize, Fresh Cassava" required>
             </div>
             
@@ -417,51 +484,57 @@ function hideAddProductForm() {
 }
 // Replace your current addProduct() with this
 async function addProduct() {
-    const title = document.getElementById("productTitle")?.value.trim();
-    const quantity = parseFloat(document.getElementById("productQty")?.value);
-    const price = parseFloat(document.getElementById("productPrice")?.value);
+    const title = document.getElementById("productTitle").value.trim();
+    const quantity = parseFloat(document.getElementById("productQty").value);
+    const price = parseFloat(document.getElementById("productPrice").value);
+    const description = document.getElementById("productDescription").value.trim() || `${title} - Fresh produce`;
+    const unit = document.getElementById("productUnit").value;
+    const category = document.getElementById("productCategory").value;
+    const imageFile = document.getElementById("productImage").files[0];
 
     if (!title) return alert("Product Title is required!");
-    if (!quantity || isNaN(quantity) || quantity <= 0) return alert("Valid Quantity is required!");
-    if (!price || isNaN(price) || price <= 0) return alert("Valid Price is required!");
+    if (!quantity || quantity <= 0) return alert("Valid Quantity is required!");
+    if (!price || price <= 0) return alert("Valid Price is required!");
 
     try {
-        const payload = {
-            title: title,
-            description: `${title} - Fresh farm produce from Cameroon`,
-            price: price,
-            quantity: quantity,
-            unit: document.getElementById("productUnit")?.value || "kg",
-            category: document.getElementById("productCategory")?.value || "grains",
-            currency: "XAF",
-            isActive: true,
-            isVerified: true,
-            // Generate a simple unique SKU to avoid duplicate key error
-            sku: `SKU-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-            // Safe location for geo index
-            location: {
-                type: "Point",
-                coordinates: [11.5021, 4.0612]   // Douala / Centre Region example
-            }
-        };
+        const formData = new FormData();
+        formData.append("title", title);
+        formData.append("description", description);
+        formData.append("price", price);
+        formData.append("quantity", quantity);
+        formData.append("unit", unit);
+        formData.append("category", category);
+        formData.append("currency", "XAF");
+        formData.append("isActive", true);
+        formData.append("isVerified", true);
 
-        console.log("📤 Sending payload:", payload);
+        if (imageFile) {
+            formData.append("images", imageFile);   // Backend must handle single image as "images"
+        }
 
-        const res = await apiPost("/api/products", payload);
+        const res = await fetch(`${API_BASE}/api/products`, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`
+            },
+            credentials: "include",
+            body: formData
+        });
 
-        if (res.success) {
-            alert("✅ Product added successfully!");
+        const result = await res.json();
+
+        if (result.success) {
+            alert("✅ Product added successfully with image!");
             hideAddProductForm();
             loadInventory();
         } else {
-            alert("Failed: " + (res.message || "Unknown error"));
+            alert("Failed: " + (result.message || "Unknown error"));
         }
     } catch (err) {
         console.error("Add product error:", err);
-        alert("Error: " + (err.message || "Failed to add product"));
+        alert("Error uploading product: " + (err.message || "Check console"));
     }
 }
-
 // Helper functions
 function showAddProductForm() {
     document.getElementById("addProductForm").style.display = "block";
@@ -470,7 +543,6 @@ function showAddProductForm() {
 function hideAddProductForm() {
     document.getElementById("addProductForm").style.display = "none";
 }
-
 // ====================== ORDERS ======================
 async function loadOrders() {
     try {
