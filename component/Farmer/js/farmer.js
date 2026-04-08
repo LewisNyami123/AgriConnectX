@@ -185,26 +185,66 @@ async function loadPage(route) {
             break;
 
         case "inventory":
-            content.innerHTML = `
-                <div class="action-bar">
-                    <button class="btn btn-primary" onclick="showAddProductForm()">+ Add New Product</button>
+    content.innerHTML = `
+        <div class="action-bar">
+            <button class="btn btn-primary" onclick="showAddProductForm()">+ Add New Product</button>
+        </div>
+        <div id="addProductForm" class="card" style="display:none;">
+            <h3>Add New Farm Produce</h3>
+            
+            <div class="form-group">
+                <label>Product Title</label>
+                <input type="text" id="productTitle" placeholder="e.g. Yellow Maize, Fresh Cassava" required>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group half">
+                    <label>Quantity</label>
+                    <input type="number" id="productQty" placeholder="100" required>
                 </div>
-                <div id="addProductForm" class="card" style="display:none;">
-                    <h3>Add New Product</h3>
-                    <input type="text" id="productName" placeholder="Product Name (e.g. Yellow Maize)">
-                    <input type="number" id="productQty" placeholder="Quantity (in Kg or Bags)">
-                    <input type="number" id="productPrice" placeholder="Price per unit (FCFA)">
-                    <button class="btn btn-primary" onclick="addProduct()">Save Product</button>
+                <div class="form-group half">
+                    <label>Unit</label>
+                    <select id="productUnit">
+                        <option value="kg">Kilograms (kg)</option>
+                        <option value="bag">Bags</option>
+                        <option value="piece">Pieces</option>
+                        <option value="crate">Crates</option>
+                    </select>
                 </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Price per unit (FCFA)</label>
+                <input type="number" id="productPrice" placeholder="450" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Category</label>
+                <select id="productCategory">
+                    <option value="grains">Grains & Cereals</option>
+                    <option value="tubers">Tubers (Cassava, Yam)</option>
+                    <option value="vegetables">Vegetables</option>
+                    <option value="fruits">Fruits</option>
+                    <option value="legumes">Legumes & Beans</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="productDescription" rows="3" placeholder="Brief description of the produce..."></textarea>
+            </div>
+            
+            <button class="btn btn-primary" onclick="addProduct()">Save Product</button>
+            <button class="btn" onclick="hideAddProductForm()">Cancel</button>
+        </div>
 
-                <table class="table">
-                    <thead><tr><th>Product</th><th>Quantity</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
-                    <tbody id="inventoryTable"></tbody>
-                </table>
-            `;
-            loadInventory();
-            break;
-
+        <table class="table">
+            <thead><tr><th>Product</th><th>Quantity</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="inventoryTable"></tbody>
+        </table>
+    `;
+    loadInventory();
+    break;
         case "orders":
             content.innerHTML = `
                 <h2>Incoming Orders</h2>
@@ -277,18 +317,19 @@ async function loadPage(route) {
 async function loadInventory() {
     try {
         const res = await apiGet("/api/products");
-        console.log("Farmer Products Response:", res);   // Debug
+        console.log("Inventory response:", res);   // Debug
 
         const tbody = document.getElementById("inventoryTable");
+
         if (!res.data || res.data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5">No products yet. Add your first farm produce!</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5">No products yet. Add your first produce!</td></tr>`;
             return;
         }
 
         tbody.innerHTML = res.data.map(p => `
             <tr>
-                <td>${p.title || p.name}</td>
-                <td>${p.quantity}</td>
+                <td>${p.title}</td>
+                <td>${p.quantity} ${p.unit || ''}</td>
                 <td>${p.price} FCFA</td>
                 <td><span class="status available">${p.isActive ? "Available" : "Inactive"}</span></td>
                 <td>
@@ -298,36 +339,60 @@ async function loadInventory() {
             </tr>
         `).join("");
     } catch (err) {
-        console.error("Load Inventory Error:", err);
+        console.error(err);
         const tbody = document.getElementById("inventoryTable");
-        tbody.innerHTML = `<tr><td colspan="5" style="color:red;">Error loading products</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" style="color:red;">Failed to load products</td></tr>`;
     }
 }
 function showAddProductForm() {
     document.getElementById("addProductForm").style.display = "block";
 }
+function hideAddProductForm() {
+    document.getElementById("addProductForm").style.display = "none";
+}
 
+// Replace your current addProduct() with this
 async function addProduct() {
-    const name = document.getElementById("productName").value.trim();
-    const quantity = document.getElementById("productQty").value;
-    const price = document.getElementById("productPrice").value;
+    const title = document.getElementById("productName").value.trim();
+    const quantity = parseFloat(document.getElementById("productQty").value);
+    const price = parseFloat(document.getElementById("productPrice").value);
 
-    if (!name || !quantity || !price) {
-        alert("Please fill all fields!");
-        return;
-    }
+    if (!title) return alert("Product title is required!");
+    if (!quantity || quantity <= 0) return alert("Quantity must be greater than 0!");
+    if (!price || price <= 0) return alert("Price must be greater than 0!");
 
     try {
-        await apiPost("/api/products", { 
-            name, 
-            quantity: Number(quantity), 
-            price: Number(price) 
-        });
-        alert("✅ Product added successfully!");
-        loadInventory();
-        document.getElementById("addProductForm").style.display = "none";
+        const payload = {
+            title: title,
+            description: `${title} - Fresh farm produce from Cameroon`,
+            price: price,
+            quantity: quantity,
+            unit: "kg",
+            category: "grains",
+            currency: "XAF",
+            isActive: true,
+            isVerified: true,
+            // Fix for location geo field
+            location: {
+                type: "Point",
+                coordinates: [11.5, 4.0]   // Example: [longitude, latitude] for Centre Region
+            }
+        };
+
+        console.log("Sending payload:", payload);
+
+        const res = await apiPost("/api/products", payload);
+
+        if (res.success) {
+            alert("✅ Product added successfully!");
+            document.getElementById("addProductForm").style.display = "none";
+            loadInventory();
+        } else {
+            alert("Failed: " + (res.message || "Unknown error"));
+        }
     } catch (err) {
-        alert("Error adding product: " + err.message);
+        console.error("Add product error:", err);
+        alert("Error: " + (err.message || "Failed to add product"));
     }
 }
 
