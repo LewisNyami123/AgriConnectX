@@ -10,7 +10,7 @@ const getAllProducts = asyncHandler(async (req, res) => {
   const limit = Math.min(50, parseInt(req.query.limit || '20', 10));
   const skip = (page - 1) * limit;
 
-  const query = { isActive: true, isVerified: true, isArchived: { $ne: true } };
+  const query = { isArchived: { $ne: true } };   // Show all non-archived products
 
   const [total, products] = await Promise.all([
     Product.countDocuments(query),

@@ -184,54 +184,38 @@ async function loadPage(route) {
             }
             break;
 
-        case "inventory":
+       case "inventory":
     content.innerHTML = `
         <div class="action-bar">
             <button class="btn btn-primary" onclick="showAddProductForm()">+ Add New Product</button>
         </div>
+        
         <div id="addProductForm" class="card" style="display:none;">
             <h3>Add New Farm Produce</h3>
             
             <div class="form-group">
-                <label>Product Title</label>
+                <label>Product Title *</label>
                 <input type="text" id="productTitle" placeholder="e.g. Yellow Maize, Fresh Cassava" required>
             </div>
             
             <div class="form-row">
                 <div class="form-group half">
-                    <label>Quantity</label>
-                    <input type="number" id="productQty" placeholder="100" required>
+                    <label>Quantity *</label>
+                    <input type="number" id="productQty" placeholder="100" min="1" required>
                 </div>
                 <div class="form-group half">
                     <label>Unit</label>
                     <select id="productUnit">
-                        <option value="kg">Kilograms (kg)</option>
-                        <option value="bag">Bags</option>
-                        <option value="piece">Pieces</option>
-                        <option value="crate">Crates</option>
+                        <option value="kg">kg</option>
+                        <option value="bag">bag</option>
+                        <option value="piece">piece</option>
                     </select>
                 </div>
             </div>
             
             <div class="form-group">
-                <label>Price per unit (FCFA)</label>
-                <input type="number" id="productPrice" placeholder="450" required>
-            </div>
-            
-            <div class="form-group">
-                <label>Category</label>
-                <select id="productCategory">
-                    <option value="grains">Grains & Cereals</option>
-                    <option value="tubers">Tubers (Cassava, Yam)</option>
-                    <option value="vegetables">Vegetables</option>
-                    <option value="fruits">Fruits</option>
-                    <option value="legumes">Legumes & Beans</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label>Description</label>
-                <textarea id="productDescription" rows="3" placeholder="Brief description of the produce..."></textarea>
+                <label>Price per unit (FCFA) *</label>
+                <input type="number" id="productPrice" placeholder="450" min="1" required>
             </div>
             
             <button class="btn btn-primary" onclick="addProduct()">Save Product</button>
@@ -245,6 +229,66 @@ async function loadPage(route) {
     `;
     loadInventory();
     break;
+//    content.innerHTML = `
+//         <div class="action-bar">
+//             <button class="btn btn-primary" onclick="showAddProductForm()">+ Add New Product</button>
+//         </div>
+//         <div id="addProductForm" class="card" style="display:none;">
+//             <h3>Add New Farm Produce</h3>
+            
+//             <div class="form-group">
+//                 <label>Product Title</label>
+//                 <input type="text" id="productTitle" placeholder="e.g. Yellow Maize, Fresh Cassava" required>
+//             </div>
+            
+//             <div class="form-row">
+//                 <div class="form-group half">
+//                     <label>Quantity</label>
+//                     <input type="number" id="productQty" placeholder="100" required>
+//                 </div>
+//                 <div class="form-group half">
+//                     <label>Unit</label>
+//                     <select id="productUnit">
+//                         <option value="kg">Kilograms (kg)</option>
+//                         <option value="bag">Bags</option>
+//                         <option value="piece">Pieces</option>
+//                         <option value="crate">Crates</option>
+//                     </select>
+//                 </div>
+//             </div>
+            
+//             <div class="form-group">
+//                 <label>Price per unit (FCFA)</label>
+//                 <input type="number" id="productPrice" placeholder="450" required>
+//             </div>
+            
+//             <div class="form-group">
+//                 <label>Category</label>
+//                 <select id="productCategory">
+//                     <option value="grains">Grains & Cereals</option>
+//                     <option value="tubers">Tubers (Cassava, Yam)</option>
+//                     <option value="vegetables">Vegetables</option>
+//                     <option value="fruits">Fruits</option>
+//                     <option value="legumes">Legumes & Beans</option>
+//                 </select>
+//             </div>
+            
+//             <div class="form-group">
+//                 <label>Description</label>
+//                 <textarea id="productDescription" rows="3" placeholder="Brief description of the produce..."></textarea>
+//             </div>
+            
+//             <button class="btn btn-primary" onclick="addProduct()">Save Product</button>
+//             <button class="btn" onclick="hideAddProductForm()">Cancel</button>
+//         </div>
+
+//         <table class="table">
+//             <thead><tr><th>Product</th><th>Quantity</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
+//             <tbody id="inventoryTable"></tbody>
+//         </table>
+//     `;
+//     loadInventory();
+//     break;
         case "orders":
             content.innerHTML = `
                 <h2>Incoming Orders</h2>
@@ -314,23 +358,38 @@ async function loadPage(route) {
 }
 
 // ====================== INVENTORY FUNCTIONS ======================
+// Replace your current loadInventory() with this
 async function loadInventory() {
     try {
+        console.log("🔄 Fetching products for farmer inventory...");
+        
+        // For testing, let's call the endpoint and see exactly what comes back
         const res = await apiGet("/api/products");
-        console.log("Inventory response:", res);   // Debug
+        
+        console.log("✅ Full response from /api/products:", res);
+        console.log("📦 Products array:", res.data);
 
         const tbody = document.getElementById("inventoryTable");
+        if (!tbody) return;
 
-        if (!res.data || res.data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5">No products yet. Add your first produce!</td></tr>`;
+        const products = res.data || [];
+
+        if (products.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align:center; padding:40px; color:#666;">
+                        No products found yet.<br>
+                        <small>Check that products have isActive: true and isVerified: true</small>
+                    </td>
+                </tr>`;
             return;
         }
 
-        tbody.innerHTML = res.data.map(p => `
+        tbody.innerHTML = products.map(p => `
             <tr>
-                <td>${p.title}</td>
-                <td>${p.quantity} ${p.unit || ''}</td>
-                <td>${p.price} FCFA</td>
+                <td>${p.title || 'Untitled Product'}</td>
+                <td>${p.quantity || 0} ${p.unit || ''}</td>
+                <td>${p.price || 0} FCFA</td>
                 <td><span class="status available">${p.isActive ? "Available" : "Inactive"}</span></td>
                 <td>
                     <button onclick="editProduct('${p._id}')">Edit</button>
@@ -338,28 +397,33 @@ async function loadInventory() {
                 </td>
             </tr>
         `).join("");
+
     } catch (err) {
-        console.error(err);
+        console.error("❌ Load Inventory Error:", err);
         const tbody = document.getElementById("inventoryTable");
-        tbody.innerHTML = `<tr><td colspan="5" style="color:red;">Failed to load products</td></tr>`;
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="5" style="color:red; text-align:center;">Failed to load products. Check console.</td></tr>`;
+        }
     }
 }
 function showAddProductForm() {
-    document.getElementById("addProductForm").style.display = "block";
-}
-function hideAddProductForm() {
-    document.getElementById("addProductForm").style.display = "none";
+    const form = document.getElementById("addProductForm");
+    if (form) form.style.display = "block";
 }
 
+function hideAddProductForm() {
+    const form = document.getElementById("addProductForm");
+    if (form) form.style.display = "none";
+}
 // Replace your current addProduct() with this
 async function addProduct() {
-    const title = document.getElementById("productName").value.trim();
-    const quantity = parseFloat(document.getElementById("productQty").value);
-    const price = parseFloat(document.getElementById("productPrice").value);
+    const title = document.getElementById("productTitle")?.value.trim();
+    const quantity = parseFloat(document.getElementById("productQty")?.value);
+    const price = parseFloat(document.getElementById("productPrice")?.value);
 
-    if (!title) return alert("Product title is required!");
-    if (!quantity || quantity <= 0) return alert("Quantity must be greater than 0!");
-    if (!price || price <= 0) return alert("Price must be greater than 0!");
+    if (!title) return alert("Product Title is required!");
+    if (!quantity || isNaN(quantity) || quantity <= 0) return alert("Valid Quantity is required!");
+    if (!price || isNaN(price) || price <= 0) return alert("Valid Price is required!");
 
     try {
         const payload = {
@@ -367,25 +431,27 @@ async function addProduct() {
             description: `${title} - Fresh farm produce from Cameroon`,
             price: price,
             quantity: quantity,
-            unit: "kg",
-            category: "grains",
+            unit: document.getElementById("productUnit")?.value || "kg",
+            category: document.getElementById("productCategory")?.value || "grains",
             currency: "XAF",
             isActive: true,
             isVerified: true,
-            // Fix for location geo field
+            // Generate a simple unique SKU to avoid duplicate key error
+            sku: `SKU-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+            // Safe location for geo index
             location: {
                 type: "Point",
-                coordinates: [11.5, 4.0]   // Example: [longitude, latitude] for Centre Region
+                coordinates: [11.5021, 4.0612]   // Douala / Centre Region example
             }
         };
 
-        console.log("Sending payload:", payload);
+        console.log("📤 Sending payload:", payload);
 
         const res = await apiPost("/api/products", payload);
 
         if (res.success) {
             alert("✅ Product added successfully!");
-            document.getElementById("addProductForm").style.display = "none";
+            hideAddProductForm();
             loadInventory();
         } else {
             alert("Failed: " + (res.message || "Unknown error"));
@@ -394,6 +460,15 @@ async function addProduct() {
         console.error("Add product error:", err);
         alert("Error: " + (err.message || "Failed to add product"));
     }
+}
+
+// Helper functions
+function showAddProductForm() {
+    document.getElementById("addProductForm").style.display = "block";
+}
+
+function hideAddProductForm() {
+    document.getElementById("addProductForm").style.display = "none";
 }
 
 // ====================== ORDERS ======================
