@@ -203,6 +203,7 @@ function addCurrentProductToCart(productId) {
 }
 
 // ====================== CART ======================
+// Improved Add to Cart
 function addToCart(productId, name, price) {
     const existing = cart.find(item => item.productId === productId);
     if (existing) {
@@ -210,9 +211,14 @@ function addToCart(productId, name, price) {
     } else {
         cart.push({ productId, name, price, quantity: 1 });
     }
+
     updateCartCount();
+    
+    // Nice Amazon-style toast
     showToast(`✅ ${name} added to cart`);
 }
+
+
 
 function updateCartCount() {
     const el = document.getElementById("cartCount");
@@ -258,12 +264,27 @@ function checkout() {
 }
 
 // ====================== UTILITIES ======================
+// function showToast(message) {
+//     const toast = document.createElement("div");
+//     toast.className = "toast";
+//     toast.textContent = message;
+//     document.body.appendChild(toast);
+//     setTimeout(() => toast.remove(), 2500);
+// }
+// Better Toast
 function showToast(message) {
     const toast = document.createElement("div");
     toast.className = "toast";
-    toast.textContent = message;
+    toast.innerHTML = `
+        <i class="fas fa-check-circle"></i>
+        <span>${message}</span>
+    `;
     document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 2500);
+
+    setTimeout(() => {
+        toast.style.opacity = "0";
+        setTimeout(() => toast.remove(), 300);
+    }, 2800);
 }
 
 // ====================== LOGOUT ======================
