@@ -565,11 +565,12 @@ function hideAddProductForm() {
     if (form) form.style.display = "none";
 }
 // Replace your current addProduct() with this
+// Updated addProduct() with image upload
 async function addProduct() {
     const title = document.getElementById("productTitle").value.trim();
     const quantity = parseFloat(document.getElementById("productQty").value);
     const price = parseFloat(document.getElementById("productPrice").value);
-    const description = document.getElementById("productDescription").value.trim() || `${title} - Fresh produce`;
+    const description = document.getElementById("productDescription").value.trim() || `${title} - Fresh farm produce`;
     const unit = document.getElementById("productUnit").value;
     const category = document.getElementById("productCategory").value;
     const imageFile = document.getElementById("productImage").files[0];
@@ -587,12 +588,14 @@ async function addProduct() {
         formData.append("unit", unit);
         formData.append("category", category);
         formData.append("currency", "XAF");
-        formData.append("isActive", true);
-        formData.append("isVerified", true);
+        formData.append("isActive", "true");
+        formData.append("isVerified", "true");
 
         if (imageFile) {
-            formData.append("images", imageFile);   // Backend must handle single image as "images"
+            formData.append("images", imageFile);   // Important: name must match backend
         }
+
+        console.log("Uploading product with image...");
 
         const res = await fetch(`${API_BASE}/api/products`, {
             method: "POST",
@@ -613,8 +616,8 @@ async function addProduct() {
             alert("Failed: " + (result.message || "Unknown error"));
         }
     } catch (err) {
-        console.error("Add product error:", err);
-        alert("Error uploading product: " + (err.message || "Check console"));
+        console.error("Upload error:", err);
+        alert("Error uploading product: " + (err.message || "Please check console"));
     }
 }
 // Helper functions
