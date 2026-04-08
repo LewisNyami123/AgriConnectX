@@ -160,7 +160,7 @@ async function loadPage(route) {
                 new Chart(document.getElementById("productChart"), {
                     type: "doughnut",
                     data: {
-                        labels: (productsRes.data || []).slice(0,5).map(p => p.name),
+                        labels: (productsRes.data || []).slice(0,5).map(p => p.title || "Product"),
                         datasets: [{ 
                             data: (productsRes.data || []).slice(0,5).map(p => p.quantity), 
                             backgroundColor: ["#15803d","#4ade80","#eab308","#f97316","#ef4444"] 
