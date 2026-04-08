@@ -120,14 +120,18 @@ async function loadPage(route) {
 }
 
 // ====================== MARKETPLACE ======================
+// ====================== MARKETPLACE (Updated for your backend) ======================
 async function loadMarketplace(searchTerm = "") {
     try {
+        console.log("🔄 Buyer fetching products...");
         const res = await apiGet("/api/products");
+        console.log("✅ Buyer received products:", res);
+
         let products = res.data || [];
 
         if (searchTerm) {
             products = products.filter(p => 
-                (p.title || p.name || "").toLowerCase().includes(searchTerm.toLowerCase())
+                (p.title || "").toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
 
@@ -135,36 +139,47 @@ async function loadMarketplace(searchTerm = "") {
         if (!grid) return;
 
         if (products.length === 0) {
-            grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:80px;color:#666;">
-                <h3>No products yet</h3>
-                <p>Farmers are adding fresh produce. Check back soon!</p>
-            </div>`;
+            grid.innerHTML = `
+                <div style="grid-column: 1/-1; text-align: center; padding: 80px 20px; color: #666;">
+                    <h3>No products available yet</h3>
+                    <p>Farmers are adding fresh produce. Please check back soon.</p>
+                </div>`;
             return;
         }
 
         grid.innerHTML = products.map(p => {
-            const imgUrl = p.images && p.images.length ? (p.images[0].url || p.images[0]) : 'https://picsum.photos/300/220?random=' + p._id;
+            const imageUrl = p.images && p.images.length > 0 
+                ? (p.images[0].url || p.images[0]) 
+                : `https://picsum.photos/300/220?random=${p._id || Math.random()}`;
+
             return `
                 <div class="product-card">
                     <div class="product-image">
-                        <img src="${imgUrl}" alt="${p.title}">
+                        <img src="${imageUrl}" alt="${p.title}">
                     </div>
                     <h4>${p.title}</h4>
                     <p class="price">${p.price} FCFA</p>
-                    <p class="stock">${p.quantity} available</p>
-                    <p class="seller">by ${p.seller?.farmName || 'Farmer'}</p>
+                    <p class="stock">${p.quantity} ${p.unit || 'units'} available</p>
+                    <p class="seller">by ${p.seller?.farmName || p.seller?.firstName || 'Farmer'}</p>
+                    
                     <div class="product-actions">
-                        <button class="btn-cart" onclick="addToCart('${p._id}', '${p.title}', ${p.price})">Add to Cart</button>
-                        <button class="btn-view" onclick="viewProductDetail('${p._id}')">View Details</button>
+                        <button class="btn-cart" onclick="addToCart('${p._id}', '${p.title.replace(/'/g, "\\'")}', ${p.price})">
+                            Add to Cart
+                        </button>
+                        <button class="btn-view" onclick="viewProductDetail('${p._id}')">
+                            View Details
+                        </button>
                     </div>
                 </div>
             `;
         }).join("");
+
     } catch (err) {
-        console.error(err);
+        console.error("❌ Failed to load marketplace:", err);
+        const grid = document.getElementById("productGrid");
+        if (grid) grid.innerHTML = `<p style="color:red; text-align:center;">Failed to load products.</p>`;
     }
 }
-
 // ====================== PRODUCT DETAIL MODAL ======================
 let currentProduct = null;
 
