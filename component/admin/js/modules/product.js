@@ -59,7 +59,7 @@ export async function renderProducts(){
           
           <tr>
 
-            <td>${p.name}</td>
+            <td>${p.title}</td>
 
             <td>${p.category}</td>
 
@@ -86,7 +86,7 @@ export async function renderProducts(){
 
       ${topProducts.map(p => `
         <li>
-          ${p.name} — $${p.revenue || 0}
+          ${p.title} — $${p.price || 0}
         </li>
       `).join("")}
 
